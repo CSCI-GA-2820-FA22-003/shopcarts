@@ -11,6 +11,8 @@ assignees: ''
 **I need**
 **So that**
 
+**Assumptions**
+
 **Acceptance Criteria:**
 
 ```gherkin
