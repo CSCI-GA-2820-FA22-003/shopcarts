@@ -26,25 +26,22 @@ class DataValidationError(Exception):
 
 class Shopcarts(db.Model):
     """
-    Class that represents a Products
+    Class that represents a Shopcart
     """
-
-    app = None
-
     # Table Schema
+    __tablename__ = "shopcarts"
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String(63), nullable=False, unique=True)
+    userId = db.Column(db.String(63), nullable=False, primary_key=True)
+
 
 class Products(db.Model):
     """
     Class that represents a Products
     """
-
-    app = None
-
     # Table Schema
+    __tablename__ = "products"
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String(63), db.ForeignKey("shopcarts.userId"), nullable=False)
+    userId = db.Column(db.String(63), db.ForeignKey("shopcarts.id"), nullable=False)
     productId = db.Column(db.String(63), nullable=False)
     name = db.Column(db.String(63), nullable=False)
     quantity = db.Column(db.Float, nullable=False)
@@ -58,12 +55,13 @@ class Products(db.Model):
         """
         Creates a Products to the database
         """
-        logger.info("Creating %s", self.name)
         products = self.find_by_user_id_product_id(self.userId, self.productId)
         if len(products.all()) > 0:
+            logger.info("Saving %s", self.name)
             self.id = products.all()[0].id
             db.session.commit()
         else:
+            logger.info("Creating %s", self.name)
             self.id = None  # id must be none to generate next primary key
             db.session.add(self)
             db.session.commit()
