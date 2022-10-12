@@ -33,7 +33,7 @@ class Shopcarts(db.Model):
 
     # Table Schema
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String(63), nullable=False)
+    userId = db.Column(db.String(63), nullable=False, unique=True)
 
 class Products(db.Model):
     """
@@ -59,7 +59,7 @@ class Products(db.Model):
         Creates a Products to the database
         """
         logger.info("Creating %s", self.name)
-        products = self.find_by_userId_productId(self.userId, self.productId)
+        products = self.find_by_user_id_product_id(self.userId, self.productId)
         if len(products.all()) > 0:
             self.id = products.all()[0].id
             db.session.commit()
@@ -67,7 +67,6 @@ class Products(db.Model):
             self.id = None  # id must be none to generate next primary key
             db.session.add(self)
             db.session.commit()
-        
 
     def update(self):
         """
@@ -87,7 +86,7 @@ class Products(db.Model):
     def serialize(self):
         """ Serializes a Products into a dictionary """
         return {
-            "id": self.id, 
+            "id": self.id,
             "userId": self.userId,
             "productId": self.productId,
             "name": self.name,
@@ -154,17 +153,18 @@ class Products(db.Model):
         return cls.query.filter(cls.name == name)
 
     @classmethod
-    def find_by_userId_productId(cls, userId, productId):
+    def find_by_user_id_product_id(cls, user_id, product_id):
         """Returns all Products with the given name
 
         Args:
             name (string): the name of the Products you want to match
         """
-        logger.info("Processing userId and productId query for %s and %s ..." % (userId, productId))
+        logger.info("Processing userId and productId query for %s and %s ..." 
+        % (user_id, product_id))
         return cls.query.filter(
             and_(
-                cls.userId == userId,
-                cls.productId == productId
+                cls.userId == user_id,
+                cls.productId == product_id
             )
         )
 

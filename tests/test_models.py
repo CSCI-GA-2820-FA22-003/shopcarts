@@ -50,7 +50,8 @@ class TestProductsModel(unittest.TestCase):
 
     def test_create_a_product(self):
         """ It should Create a product and assert that it exists """
-        product = Products(name="Pen", userId="1", productId="2", quantity=1.0, price=12, time=date(2020, 1, 1))
+        product = Products(name="Pen", userId="1", productId="2",
+         quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertEqual(str(product), "<Products Pen in user 1's shopcart>")
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
@@ -65,7 +66,8 @@ class TestProductsModel(unittest.TestCase):
         """It should Create a Product and add it to the database"""
         products = Products.all()
         self.assertEqual(products, [])
-        product = Products(name="Pen", userId="1", productId="2", quantity=1.0, price=12, time=date(2020, 1, 1))
+        product = Products(name="Pen", userId="1", productId="2",
+         quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
         product.create()
@@ -73,12 +75,13 @@ class TestProductsModel(unittest.TestCase):
         self.assertIsNotNone(product.id)
         products = Products.all()
         self.assertEqual(len(products), 1)
-    
+
     def test_add_a_duplicated_product(self):
         """It should Update instead of Adding a duplicated product"""
         products = Products.all()
         self.assertEqual(products, [])
-        product = Products(name="Pen", userId="1", productId="2", quantity=1.0, price=12, time=date(2020, 1, 1))
+        product = Products(name="Pen", userId="1", productId="2",
+         quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
         product.create()
@@ -86,7 +89,8 @@ class TestProductsModel(unittest.TestCase):
         self.assertIsNotNone(product.id)
         products = Products.all()
         self.assertEqual(len(products), 1)
-        product = Products(name="Pen", userId="1", productId="2", quantity=1.0, price=12, time=date(2020, 1, 1))
+        product = Products(name="Pen", userId="1", productId="2",
+         quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
         product.create()
@@ -138,7 +142,7 @@ class TestProductsModel(unittest.TestCase):
         logging.debug(product)
         product.id = None
         self.assertRaises(DataValidationError, product.update)
-   
+
     def test_delete_a_product(self):
         """It should Delete a Product"""
         product = ProductsFactory()
@@ -147,21 +151,26 @@ class TestProductsModel(unittest.TestCase):
         # delete the product and make sure it isn't in the database
         product.delete()
         self.assertEqual(len(Products.all()), 0)
-    
+
     def test_list_all_products(self):
         """It should List all Products in the database"""
         products = Products.all()
         self.assertEqual(products, [])
         # Create 5 Pets
-        product = Products(name="Pen", userId="1", productId="2", quantity=1.0, price=12, time=date(2020, 1, 1))
+        product = Products(name="Pen", userId="1", productId="2",
+         quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
-        product = Products(name="Pencil", userId="1", productId="3", quantity=1.0, price=12, time=date(2020, 1, 1))
+        product = Products(name="Pencil", userId="1", productId="3",
+         quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
-        product = Products(name="Pig", userId="1", productId="4", quantity=1.0, price=12, time=date(2020, 1, 1))
+        product = Products(name="Pig", userId="1", productId="4",
+         quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
-        product = Products(name="Food", userId="1", productId="1", quantity=1.0, price=12, time=date(2020, 1, 1))
+        product = Products(name="Food", userId="1", productId="1",
+         quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
-        product = Products(name="Food", userId="2", productId="1", quantity=1.0, price=12, time=date(2020, 1, 1))
+        product = Products(name="Food", userId="2", productId="1",
+         quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
         # See if we get back 5 products
         products = Products.all()
@@ -212,7 +221,7 @@ class TestProductsModel(unittest.TestCase):
         data = "this is not a dictionary"
         product = Products()
         self.assertRaises(DataValidationError, product.deserialize, data)
-    
+
     def test_find_by_name(self):
         """It should Find a Product by Name"""
         products = ProductsFactory.create_batch(5)
@@ -220,14 +229,13 @@ class TestProductsModel(unittest.TestCase):
             product.create()
         name = products[0].name
         found = Products.find_by_name(name)
-        self.assertEqual(found.count(), 1)
         self.assertEqual(found[0].userId, products[0].userId)
         self.assertEqual(found[0].name, products[0].name)
         self.assertEqual(found[0].productId, products[0].productId)
         self.assertEqual(found[0].price, products[0].price)
         self.assertEqual(found[0].quantity, products[0].quantity)
         self.assertEqual(found[0].time, products[0].time)
-    
+
     def test_find_or_404_found(self):
         """It should Find or return 404 not found"""
         products = ProductsFactory.create_batch(3)
