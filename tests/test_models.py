@@ -6,6 +6,7 @@ import os
 import logging
 import unittest
 from datetime import date
+from werkzeug.exceptions import NotFound
 from service.models import Products, DataValidationError, db
 from service import app
 from tests.factories import ProductsFactory
@@ -226,3 +227,23 @@ class TestProductsModel(unittest.TestCase):
         self.assertEqual(found[0].price, products[0].price)
         self.assertEqual(found[0].quantity, products[0].quantity)
         self.assertEqual(found[0].time, products[0].time)
+    
+    def test_find_or_404_found(self):
+        """It should Find or return 404 not found"""
+        products = ProductsFactory.create_batch(3)
+        for product in products:
+            product.create()
+
+        product = Products.find_or_404(products[1].id)
+        self.assertIsNot(product, None)
+        self.assertEqual(product.id, products[1].id)
+        self.assertEqual(product.userId, products[1].userId)
+        self.assertEqual(product.productId, products[1].productId)
+        self.assertEqual(product.name, products[1].name)
+        self.assertEqual(product.price, products[1].price)
+        self.assertEqual(product.quantity, products[1].quantity)
+        self.assertEqual(product.time, products[1].time)
+
+    def test_find_or_404_not_found(self):
+        """It should return 404 not found"""
+        self.assertRaises(NotFound, Products.find_or_404, 0)

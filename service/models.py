@@ -167,3 +167,14 @@ class Products(db.Model):
                 cls.productId == productId
             )
         )
+
+    @classmethod
+    def find_or_404(cls, product_id):
+        """Find a Product by it's id
+        :param product_id: the id of the Product to find
+        :type product_id: Int
+        :return: an instance with the product_id, or 404_NOT_FOUND if not found
+        :rtype: Products
+        """
+        logger.info("Processing lookup or 404 for id %s ...", product_id)
+        return cls.query.get_or_404(product_id)
