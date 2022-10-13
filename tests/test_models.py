@@ -29,6 +29,7 @@ class TestProductsModel(unittest.TestCase):
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
         Products.init_db(app)
+        Shopcarts.init_db(app)
 
     @classmethod
     def tearDownClass(cls):
