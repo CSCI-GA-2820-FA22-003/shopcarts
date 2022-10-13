@@ -18,8 +18,8 @@ class ProductsFactory(factory.Factory):
 
     id = factory.Sequence(lambda n: n)
     name = factory.Faker("first_name")
-    userId = FuzzyChoice(choices=["1", "2", "3", "4"])
-    productId = FuzzyChoice(choices=["1", "2", "3", "4"])
+    user_id = FuzzyChoice(choices=["1", "2", "3", "4"])
+    product_id = FuzzyChoice(choices=["1", "2", "3", "4"])
     quantity = FuzzyChoice(choices=[1.0, 2.0, 3.0, 4.0])
     price = FuzzyChoice(choices=[1.0, 2.0, 3.0, 4.0])
     time = FuzzyDate(date(2020, 1, 1))

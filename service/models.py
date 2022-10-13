@@ -31,18 +31,18 @@ class Shopcarts(db.Model):
     # Table Schema
     __tablename__ = "shopcarts"
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String(63), nullable=False, unique=True)
+    user_id = db.Column(db.String(63), nullable=False, unique=True)
     products = db.relationship("Products", backref="products", lazy=True)
 
     def __repr__(self):
-        return "<Shopcarts %s>" % self.userId
+        return f"<Shopcarts {self.user_id}>"
 
     def create(self):
         """
         Creates a Shopcart and add it to the database
         """
-        logger.info("Creating %s", self.userId)
-        shopcarts = self.find_by_user_id(self.userId)
+        logger.info("Creating %s", self.user_id)
+        shopcarts = self.find_by_user_id(self.user_id)
         if len(shopcarts.all())>0:
             raise DataValidationError("Shopcart already exists")
         # pylint: disable=invalid-name
@@ -58,7 +58,7 @@ class Shopcarts(db.Model):
             name (string): the name of the Products you want to match
         """
         logger.info("Processing name query for %s ...", user_id)
-        return cls.query.filter(cls.userId == user_id)
+        return cls.query.filter(cls.user_id == user_id)
 
 class Products(db.Model):
     """
@@ -67,24 +67,24 @@ class Products(db.Model):
     # Table Schema
     __tablename__ = "products"
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String(63), db.ForeignKey("shopcarts.userId"), nullable=False)
-    productId = db.Column(db.String(63), nullable=False)
+    user_id = db.Column(db.String(63), db.ForeignKey("shopcarts.user_id"), nullable=False)
+    product_id = db.Column(db.String(63), nullable=False)
     name = db.Column(db.String(63), nullable=False)
     quantity = db.Column(db.Float, nullable=False)
     price = db.Column(db.Float, nullable=False)
     time = db.Column(db.Date, nullable=False, default=date.today())
 
     def __repr__(self):
-        return "<Products %s in user %s's shopcart>" % (self.name, self.userId)
+        return f"<Products {self.name} in user {self.user_id}'s shopcart>"
 
     def create(self):
         """
         Creates a Products to the database
         """
-        products = self.find_by_user_id_product_id(self.userId, self.productId)
+        products = self.find_by_user_id_product_id(self.user_id, self.product_id)
         if len(products.all()) > 0:
             logger.info("Saving %s", self.name)
-            self.id = products.all()[0].id
+            self.id = products.all()[0].id  # pylint: disable=invalid-name
             db.session.commit()
         else:
             logger.info("Creating %s", self.name)
@@ -111,8 +111,8 @@ class Products(db.Model):
         """ Serializes a Products into a dictionary """
         return {
             "id": self.id,
-            "userId": self.userId,
-            "productId": self.productId,
+            "user_id": self.user_id,
+            "product_id": self.product_id,
             "name": self.name,
             "quantity": self.quantity,
             "price": self.price,
@@ -127,8 +127,8 @@ class Products(db.Model):
             data (dict): A dictionary containing the resource data
         """
         try:
-            self.userId = data["userId"]
-            self.productId = data["productId"]
+            self.user_id = data["user_id"]
+            self.product_id = data["product_id"]
             self.name = data["name"]
             self.quantity = data["quantity"]
             self.price = data["price"]
@@ -183,12 +183,12 @@ class Products(db.Model):
         Args:
             name (string): the name of the Products you want to match
         """
-        logger.info("Processing userId and productId query for %s and %s ..." 
-        % (user_id, product_id))
+        logger.info("Processing user_id and product_id query for %s and %s ...",
+         user_id, product_id)
         return cls.query.filter(
             and_(
-                cls.userId == user_id,
-                cls.productId == product_id
+                cls.user_id == user_id,
+                cls.product_id == product_id
             )
         )
 

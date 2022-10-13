@@ -51,14 +51,14 @@ class TestProductsModel(unittest.TestCase):
 
     def test_create_a_product(self):
         """ It should Create a product and assert that it exists """
-        product = Products(name="Pen", userId="1", productId="2",
+        product = Products(name="Pen", user_id="1", product_id="2",
          quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertEqual(str(product), "<Products Pen in user 1's shopcart>")
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
         self.assertEqual(product.name, "Pen")
-        self.assertEqual(product.userId, "1")
-        self.assertEqual(product.productId, "2")
+        self.assertEqual(product.user_id, "1")
+        self.assertEqual(product.product_id, "2")
         self.assertEqual(product.quantity, 1.0)
         self.assertEqual(product.price, 12)
         self.assertEqual(product.time, date(2020, 1, 1))
@@ -67,9 +67,9 @@ class TestProductsModel(unittest.TestCase):
         """It should Create a Product and add it to the database"""
         products = Products.all()
         self.assertEqual(products, [])
-        product = Products(name="Pen", userId="1", productId="2",
+        product = Products(name="Pen", user_id="1", product_id="2",
          quantity=1.0, price=12, time=date(2020, 1, 1))
-        shopcart = Shopcarts(userId="1")
+        shopcart = Shopcarts(user_id="1")
         shopcart.create()
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
@@ -83,18 +83,18 @@ class TestProductsModel(unittest.TestCase):
         """It should Update instead of Adding a duplicated product"""
         products = Products.all()
         self.assertEqual(products, [])
-        product = Products(name="Pen", userId="1", productId="2",
+        product = Products(name="Pen", user_id="1", product_id="2",
          quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
-        shopcart = Shopcarts(userId="1")
+        shopcart = Shopcarts(user_id="1")
         shopcart.create()
         product.create()
         # Assert that it was assigned an id and shows up in the database
         self.assertIsNotNone(product.id)
         products = Products.all()
         self.assertEqual(len(products), 1)
-        product = Products(name="Pen", userId="1", productId="2",
+        product = Products(name="Pen", user_id="1", product_id="2",
          quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
@@ -109,7 +109,7 @@ class TestProductsModel(unittest.TestCase):
         product = ProductsFactory()
         logging.debug(product)
         product.id = None
-        shopcart = Shopcarts(userId=product.userId)
+        shopcart = Shopcarts(user_id=product.user_id)
         shopcart.create()
         product.create()
         self.assertIsNotNone(product.id)
@@ -117,8 +117,8 @@ class TestProductsModel(unittest.TestCase):
         found_product = Products.find(product.id)
         self.assertEqual(found_product.id, product.id)
         self.assertEqual(found_product.name, product.name)
-        self.assertEqual(found_product.userId, product.userId)
-        self.assertEqual(found_product.productId, product.productId)
+        self.assertEqual(found_product.user_id, product.user_id)
+        self.assertEqual(found_product.product_id, product.product_id)
         self.assertEqual(found_product.quantity, product.quantity)
         self.assertEqual(found_product.price, product.price)
         self.assertEqual(found_product.time, product.time)
@@ -128,7 +128,7 @@ class TestProductsModel(unittest.TestCase):
         product = ProductsFactory()
         logging.debug(product)
         product.id = None
-        shopcart = Shopcarts(userId=product.userId)
+        shopcart = Shopcarts(user_id=product.user_id)
         shopcart.create()
         product.create()
         self.assertIsNotNone(product.id)
@@ -155,7 +155,7 @@ class TestProductsModel(unittest.TestCase):
     def test_delete_a_product(self):
         """It should Delete a Product"""
         product = ProductsFactory()
-        shopcart = Shopcarts(userId=product.userId)
+        shopcart = Shopcarts(user_id=product.user_id)
         shopcart.create()
         product.create()
         self.assertEqual(len(Products.all()), 1)
@@ -168,28 +168,28 @@ class TestProductsModel(unittest.TestCase):
         products = Products.all()
         self.assertEqual(products, [])
         # Create 5 Pets
-        product = Products(name="Pen", userId="1", productId="2",
+        product = Products(name="Pen", user_id="1", product_id="2",
          quantity=1.0, price=12, time=date(2020, 1, 1))
-        shopcart = Shopcarts(userId="1")
+        shopcart = Shopcarts(user_id="1")
         shopcart.create()
         product.create()
-        product = Products(name="Pencil", userId="1", productId="3",
+        product = Products(name="Pencil", user_id="1", product_id="3",
          quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
-        product = Products(name="Pig", userId="1", productId="4",
+        product = Products(name="Pig", user_id="1", product_id="4",
          quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
-        product = Products(name="Food", userId="1", productId="1",
+        product = Products(name="Food", user_id="1", product_id="1",
          quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
-        shopcart = Shopcarts(userId="2")
+        shopcart = Shopcarts(user_id="2")
         shopcart.create()
-        product = Products(name="Food", userId="2", productId="1",
+        product = Products(name="Food", user_id="2", product_id="1",
          quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
         # See if we get back 5 products
         products = Products.all()
-        self.assertEqual(len(products), 5) 
+        self.assertEqual(len(products), 5)
 
     def test_serialize_a_product(self):
         """It should serialize a Product"""
@@ -200,10 +200,10 @@ class TestProductsModel(unittest.TestCase):
         self.assertEqual(data["id"], product.id)
         self.assertIn("name", data)
         self.assertEqual(data["name"], product.name)
-        self.assertIn("userId", data)
-        self.assertEqual(data["userId"], product.userId)
-        self.assertIn("productId", data)
-        self.assertEqual(data["productId"], product.productId)
+        self.assertIn("user_id", data)
+        self.assertEqual(data["user_id"], product.user_id)
+        self.assertIn("product_id", data)
+        self.assertEqual(data["product_id"], product.product_id)
         self.assertIn("time", data)
         self.assertEqual(date.fromisoformat(data["time"]), product.time)
         self.assertIn("price", data)
@@ -219,15 +219,15 @@ class TestProductsModel(unittest.TestCase):
         self.assertNotEqual(product, None)
         self.assertEqual(product.id, None)
         self.assertEqual(product.name, data["name"])
-        self.assertEqual(product.userId, data["userId"])
-        self.assertEqual(product.productId, data["productId"])
+        self.assertEqual(product.user_id, data["user_id"])
+        self.assertEqual(product.product_id, data["product_id"])
         self.assertEqual(product.price, data["price"])
         self.assertEqual(product.quantity, data["quantity"])
         self.assertEqual(product.time, date.fromisoformat(data["time"]))
 
     def test_deserialize_missing_data(self):
         """It should not deserialize a Product with missing data"""
-        data = {"id": 1, "name": "Spoon", "userId": "1"}
+        data = {"id": 1, "name": "Spoon", "user_id": "1"}
         product = Products()
         self.assertRaises(DataValidationError, product.deserialize, data)
 
@@ -241,15 +241,15 @@ class TestProductsModel(unittest.TestCase):
         """It should Find a Product by Name"""
         products = ProductsFactory.create_batch(5)
         for product in products:
-            if len(Shopcarts.find_by_user_id(product.userId).all())==0:
-                shopcart = Shopcarts(userId=product.userId)
+            if len(Shopcarts.find_by_user_id(product.user_id).all())==0:
+                shopcart = Shopcarts(user_id=product.user_id)
                 shopcart.create()
             product.create()
         name = products[0].name
         found = Products.find_by_name(name)
-        self.assertEqual(found[0].userId, products[0].userId)
+        self.assertEqual(found[0].user_id, products[0].user_id)
         self.assertEqual(found[0].name, products[0].name)
-        self.assertEqual(found[0].productId, products[0].productId)
+        self.assertEqual(found[0].product_id, products[0].product_id)
         self.assertEqual(found[0].price, products[0].price)
         self.assertEqual(found[0].quantity, products[0].quantity)
         self.assertEqual(found[0].time, products[0].time)
@@ -258,16 +258,16 @@ class TestProductsModel(unittest.TestCase):
         """It should Find or return 404 not found"""
         products = ProductsFactory.create_batch(3)
         for product in products:
-            if len(Shopcarts.find_by_user_id(product.userId).all())==0:
-                shopcart = Shopcarts(userId=product.userId)
+            if len(Shopcarts.find_by_user_id(product.user_id).all())==0:
+                shopcart = Shopcarts(user_id=product.user_id)
                 shopcart.create()
             product.create()
 
         product = Products.find_or_404(products[0].id)
         self.assertIsNot(product, None)
         self.assertEqual(product.id, products[0].id)
-        self.assertEqual(product.userId, products[0].userId)
-        self.assertEqual(product.productId, products[0].productId)
+        self.assertEqual(product.user_id, products[0].user_id)
+        self.assertEqual(product.product_id, products[0].product_id)
         self.assertEqual(product.name, products[0].name)
         self.assertEqual(product.price, products[0].price)
         self.assertEqual(product.quantity, products[0].quantity)
