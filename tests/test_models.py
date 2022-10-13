@@ -38,6 +38,7 @@ class TestProductsModel(unittest.TestCase):
     def setUp(self):
         """ This runs before each test """
         db.session.query(Products).delete()  # clean up the last tests
+        db.session.query(Shopcarts).delete()  # clean up the last tests
         db.session.commit()
 
     def tearDown(self):
@@ -68,6 +69,8 @@ class TestProductsModel(unittest.TestCase):
         self.assertEqual(products, [])
         product = Products(name="Pen", userId="1", productId="2",
          quantity=1.0, price=12, time=date(2020, 1, 1))
+        shopcart = Shopcarts(userId="1")
+        shopcart.create()
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
         product.create()
@@ -84,6 +87,8 @@ class TestProductsModel(unittest.TestCase):
          quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
+        shopcart = Shopcarts(userId="1")
+        shopcart.create()
         product.create()
         # Assert that it was assigned an id and shows up in the database
         self.assertIsNotNone(product.id)
@@ -104,6 +109,8 @@ class TestProductsModel(unittest.TestCase):
         product = ProductsFactory()
         logging.debug(product)
         product.id = None
+        shopcart = Shopcarts(userId=product.userId)
+        shopcart.create()
         product.create()
         self.assertIsNotNone(product.id)
         # Fetch it back
@@ -121,6 +128,8 @@ class TestProductsModel(unittest.TestCase):
         product = ProductsFactory()
         logging.debug(product)
         product.id = None
+        shopcart = Shopcarts(userId=product.userId)
+        shopcart.create()
         product.create()
         self.assertIsNotNone(product.id)
         # Change it an save it
@@ -146,6 +155,8 @@ class TestProductsModel(unittest.TestCase):
     def test_delete_a_product(self):
         """It should Delete a Product"""
         product = ProductsFactory()
+        shopcart = Shopcarts(userId=product.userId)
+        shopcart.create()
         product.create()
         self.assertEqual(len(Products.all()), 1)
         # delete the product and make sure it isn't in the database
@@ -159,6 +170,8 @@ class TestProductsModel(unittest.TestCase):
         # Create 5 Pets
         product = Products(name="Pen", userId="1", productId="2",
          quantity=1.0, price=12, time=date(2020, 1, 1))
+        shopcart = Shopcarts(userId="1")
+        shopcart.create()
         product.create()
         product = Products(name="Pencil", userId="1", productId="3",
          quantity=1.0, price=12, time=date(2020, 1, 1))
@@ -169,6 +182,8 @@ class TestProductsModel(unittest.TestCase):
         product = Products(name="Food", userId="1", productId="1",
          quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
+        shopcart = Shopcarts(userId="2")
+        shopcart.create()
         product = Products(name="Food", userId="2", productId="1",
          quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
@@ -226,6 +241,9 @@ class TestProductsModel(unittest.TestCase):
         """It should Find a Product by Name"""
         products = ProductsFactory.create_batch(5)
         for product in products:
+            if len(Shopcarts.find_by_user_id(product.userId).all())==0:
+                shopcart = Shopcarts(userId=product.userId)
+                shopcart.create()
             product.create()
         name = products[0].name
         found = Products.find_by_name(name)
@@ -240,6 +258,9 @@ class TestProductsModel(unittest.TestCase):
         """It should Find or return 404 not found"""
         products = ProductsFactory.create_batch(3)
         for product in products:
+            if len(Shopcarts.find_by_user_id(product.userId).all())==0:
+                shopcart = Shopcarts(userId=product.userId)
+                shopcart.create()
             product.create()
 
         product = Products.find_or_404(products[0].id)

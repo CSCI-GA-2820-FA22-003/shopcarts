@@ -31,8 +31,34 @@ class Shopcarts(db.Model):
     # Table Schema
     __tablename__ = "shopcarts"
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String(63), nullable=False, primary_key=True)
+    userId = db.Column(db.String(63), nullable=False, unique=True)
+    products = db.relationship("Products", backref="products", lazy=True)
 
+    def __repr__(self):
+        return "<Shopcarts %s>" % self.userId
+
+    def create(self):
+        """
+        Creates a Shopcart and add it to the database
+        """
+        logger.info("Creating %s", self.userId)
+        shopcarts = self.find_by_user_id(self.userId)
+        if len(shopcarts.all())>0:
+            raise DataValidationError("Shopcart already exists")
+        # pylint: disable=invalid-name
+        self.id = None  # id must be none to generate next primary key
+        db.session.add(self)
+        db.session.commit()
+
+    @classmethod
+    def find_by_user_id(cls, user_id):
+        """Returns all Products with the given name
+
+        Args:
+            name (string): the name of the Products you want to match
+        """
+        logger.info("Processing name query for %s ...", user_id)
+        return cls.query.filter(cls.userId == user_id)
 
 class Products(db.Model):
     """
@@ -41,7 +67,7 @@ class Products(db.Model):
     # Table Schema
     __tablename__ = "products"
     id = db.Column(db.Integer, primary_key=True)
-    userId = db.Column(db.String(63), db.ForeignKey("shopcarts.id"), nullable=False)
+    userId = db.Column(db.String(63), db.ForeignKey("shopcarts.userId"), nullable=False)
     productId = db.Column(db.String(63), nullable=False)
     name = db.Column(db.String(63), nullable=False)
     quantity = db.Column(db.Float, nullable=False)
