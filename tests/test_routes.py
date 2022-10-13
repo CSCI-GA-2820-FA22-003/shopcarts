@@ -139,15 +139,13 @@ class TestYourResourceServer(TestCase):
         products = self._create_products(5, shopcart.user_id)
         for product in products:
             resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
-            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-            resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}")
-            self.assertEqual(resp.status_code, status.HTTP_200_OK)
             data = resp.get_json()
+            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
             self.assertEqual(data["user_id"], product.user_id)
             self.assertEqual(data["product_id"], product.product_id)
             self.assertEqual(data["name"], product.name)
 
-    def test_read_products(self):
+    def test_read_a_product(self):
         """ It should Read a Product """
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
@@ -156,6 +154,8 @@ class TestYourResourceServer(TestCase):
         for product in products:
             resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
             self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+            resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}")
+            self.assertEqual(resp.status_code, status.HTTP_200_OK)
             data = resp.get_json()
             self.assertEqual(data["user_id"], product.user_id)
             self.assertEqual(data["product_id"], product.product_id)
@@ -171,6 +171,19 @@ class TestYourResourceServer(TestCase):
         data = response.get_json()
         logging.debug("Response data = %s", data)
         self.assertIn("was not found", data["message"])
+
+    def test_list_all_products(self):
+        """ It should Read all Products """
+        shopcart = ShopcartsFactory()
+        logging.debug("Test Shopcart: %s", shopcart.serialize())
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        products = self._create_products(5, shopcart.user_id)
+        for product in products:
+            resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items")
+        data = resp.get_json()
+        self.assertEqual(len(data), 5)
 
 
     ######################################################################

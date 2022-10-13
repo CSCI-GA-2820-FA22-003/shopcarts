@@ -105,6 +105,7 @@ def add_a_product(user_id):
     """Add a product to the shopcart"""
     app.logger.info("Add a product into the shopcart")
     product = Products()
+    check_content_type("application/json")
     product.deserialize(request.get_json())
     product.create()
     app.logger.info(f"Product {product.product_id} created in shopcart {user_id}")
@@ -134,6 +135,25 @@ def read_a_product(user_id, product_id):
     # Return the new shopcart
     app.logger.info("Returning product: %s", product_id)
     return jsonify(products[0].serialize()), status.HTTP_200_OK
+
+######################################################################
+# LIST ALL PRODUCTS
+######################################################################
+@app.route("/shopcarts/<user_id>/items", methods=["GET"])
+def list_all_products(user_id):
+    """Read all products in the shopcart"""
+    shopcarts = Shopcarts.find_by_user_id(user_id).all()
+    if len(shopcarts) == 0:
+        abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
+    app.logger.info(f"Read all products in the shopcart {user_id}")
+    products = Products.find_by_user_id(user_id).all()
+
+    # Return the list of products
+    app.logger.info("Returning products")
+    serialized_products = []
+    for product in products:
+        serialized_products.append(product.serialize())
+    return jsonify(serialized_products), status.HTTP_200_OK
 
 
 ######################################################################
