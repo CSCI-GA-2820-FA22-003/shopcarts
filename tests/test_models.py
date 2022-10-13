@@ -16,7 +16,7 @@ DATABASE_URI = os.getenv(
 )
 
 ######################################################################
-#  Products   M O D E L   T E S T   C A S E S
+#  M O D E L   T E S T   C A S E S
 ######################################################################
 class TestProductsModel(unittest.TestCase):
     """ Test Cases for Products Model """
@@ -34,6 +34,9 @@ class TestProductsModel(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """ This runs once after the entire test suite """
+        db.drop_all()
+        db.create_all()
+        db.session.commit()
         db.session.close()
 
     def setUp(self):

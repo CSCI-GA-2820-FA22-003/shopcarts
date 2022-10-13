@@ -32,7 +32,7 @@ def index():
 # -----------------------------------------------------------
 @app.route("/shopcarts", methods=["POST"])
 def create_shopcarts():
-    """Creates a new counter and stores it in the database
+    """Creates a new shopcart and stores it in the database
     Args:
         user_id (str): the user_id of the shopcart to create
     Returns:
@@ -49,11 +49,11 @@ def create_shopcarts():
     if len(shopcart.all()) != 0:
         abort(status.HTTP_409_CONFLICT, f"Shopcart {user_id} already exists")
 
-    # Create the new counter
+    # Create the new shopcart
     shopcart = Shopcarts(user_id=user_id)
     shopcart.create()
 
-    # Set the location header and return the new counter
+    # Set the location header and return the new shopcart
     location_url = url_for("read_a_shopcart", user_id=user_id, _external=True)
     return (
         jsonify(shopcart.serialize()),
@@ -66,7 +66,7 @@ def create_shopcarts():
 # -----------------------------------------------------------
 @app.route("/shopcarts/<user_id>", methods=["GET"])
 def read_a_shopcart(user_id):
-    """Creates a new counter and stores it in the database
+    """Read a shopcart
     Args:
         user_id (str): the user_id of the shopcart to create
     Returns:
@@ -79,7 +79,7 @@ def read_a_shopcart(user_id):
     if len(shopcarts) == 0:
         abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
 
-    # Set the location header and return the new counter
+    # Return the new shopcart
     app.logger.info("Returning shopcart: %s", user_id)
     return jsonify(shopcarts[0].serialize()), status.HTTP_200_OK
 
@@ -96,6 +96,44 @@ def list_shopcarts():
     results = [shopcart.serialize() for shopcart in shopcarts]
     app.logger.info("Returning %d shopcarts", len(results))
     return jsonify(results), status.HTTP_200_OK
+
+######################################################################
+# ADD A PRODUCT
+######################################################################
+@app.route("/shopcarts/<user_id>/items", methods=["POST"])
+def add_a_product(user_id):
+    """Add a product to the shopcart"""
+    app.logger.info("Add a product into the shopcart")
+    product = Products()
+    product.deserialize(request.get_json())
+    product.create()
+    app.logger.info(f"Product {product.product_id} created in shopcart {user_id}")
+
+    # Set the location header and return the new product
+    location_url = url_for("read_a_product", user_id=user_id,
+     product_id=product.product_id, _external=True)
+    return (
+        jsonify(product.serialize()),
+        status.HTTP_201_CREATED,
+        {"Location": location_url},
+    )
+
+######################################################################
+# READ A PRODUCT
+######################################################################
+@app.route("/shopcarts/<user_id>/items/<product_id>", methods=["GET"])
+def read_a_product(user_id, product_id):
+    """Read a product in the shopcart"""
+    app.logger.info(f"Read a product {product_id} in the shopcart {user_id}")
+    products = Products.find_by_user_id_product_id(user_id, product_id).all()
+
+    if len(products) == 0:
+        abort(status.HTTP_404_NOT_FOUND,
+         f"Product with id {product_id} was not found in shopcart {user_id}.")
+
+    # Return the new shopcart
+    app.logger.info("Returning product: %s", product_id)
+    return jsonify(products[0].serialize()), status.HTTP_200_OK
 
 
 ######################################################################
