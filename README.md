@@ -1,6 +1,6 @@
-# This is the project for our shopcarts team.
+# This is the project for our shopcarts team
 
-## Reminder: Whenever you make changes to the table schema. Run `flask create-db` to sync the database.
+## Reminder: Whenever you make changes to the table schema. Run `flask create-db` to sync the database
 
 Product table schema
 ```
