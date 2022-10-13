@@ -51,6 +51,20 @@ class TestYourResourceServer(TestCase):
         """ This runs after each test """
         db.session.remove()
 
+    def _create_shopcarts(self, count):
+        """Factory method to create pets in bulk"""
+        shopcarts = []
+        for i in range(count):
+            test_shopcart = Shopcarts(user_id=str(i))
+            response = self.app.post("/shopcarts", json=test_shopcart.serialize())
+            self.assertEqual(
+                response.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
+            )
+            new_shopcart = response.get_json()
+            test_shopcart.id = new_shopcart["id"]
+            shopcarts.append(test_shopcart)
+        return shopcarts
+
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
     ######################################################################
@@ -87,6 +101,14 @@ class TestYourResourceServer(TestCase):
         logging.debug("Response data = %s", data)
         self.assertIn("was not found", data["message"])
 
+    def test_get_shopcart_list(self):
+        """It should Get a list of Shopcarts"""
+        self._create_shopcarts(5)
+        response = self.app.get("/shopcarts")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.get_json()
+        self.assertEqual(len(data), 5)
+
     ######################################################################
     #  T E S T   S A D   P A T H S
     ######################################################################
@@ -99,4 +121,9 @@ class TestYourResourceServer(TestCase):
     def test_create_pet_no_content_type(self):
         """It should not Create a Shopcart with no content type"""
         response = self.app.post("/shopcarts")
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_create_pet_no_content_type_with_header(self):
+        """It should not Create a Shopcart with no content type"""
+        response = self.app.post("/shopcarts", headers={"Content-Type": "application/haha"})
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)

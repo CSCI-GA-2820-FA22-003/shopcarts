@@ -83,6 +83,20 @@ def read_a_shopcart(user_id):
     app.logger.info("Returning shopcart: %s", user_id)
     return jsonify(shopcarts[0].serialize()), status.HTTP_200_OK
 
+######################################################################
+# LIST ALL SHOPCARTS
+######################################################################
+@app.route("/shopcarts", methods=["GET"])
+def list_shopcarts():
+    """Returns all of the Shopcarts"""
+    app.logger.info("Request for shopcart list")
+    shopcarts = []
+    shopcarts = Shopcarts.all()
+
+    results = [shopcart.serialize() for shopcart in shopcarts]
+    app.logger.info("Returning %d shopcarts", len(results))
+    return jsonify(results), status.HTTP_200_OK
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S

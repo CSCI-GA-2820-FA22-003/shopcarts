@@ -2,6 +2,8 @@
 
 ## Reminder: Whenever you make changes to the table schema. Run `flask create-db` to sync the database
 
+## Run `flask run` to start the service. If you want to clean the database, run `flask create-db`.
+
 Product table schema
 ```
 {
