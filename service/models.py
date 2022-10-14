@@ -18,6 +18,7 @@ db = SQLAlchemy()
 def init_db(app):
     """Initialize the SQLAlchemy app"""
     Products.init_db(app)
+    Shopcarts.init_db(app)
 
 
 class DataValidationError(Exception):
@@ -86,7 +87,10 @@ class Shopcarts(db.Model):
         """
         try:
             self.user_id = data["user_id"]
-            self.products = data["products"]
+            if "products" in data:
+                self.products = data["products"]
+            else:
+                self.products = []
         except KeyError as error:
             raise DataValidationError(
                 "Invalid Products: missing " + error.args[0]
@@ -97,6 +101,12 @@ class Shopcarts(db.Model):
                 "Error message: " + str(error)
             ) from error
         return self
+
+    @classmethod
+    def init_db(cls, app):
+        """ Initializes the database session """
+        logger.info("Initializing database")
+        cls.app = app
 
     @classmethod
     def find_by_user_id(cls, user_id):
