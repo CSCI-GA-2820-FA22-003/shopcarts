@@ -185,6 +185,36 @@ class TestYourResourceServer(TestCase):
         data = resp.get_json()
         self.assertEqual(len(data), 5)
 
+    def test_update_a_product(self):
+        """ It should Update a Product """
+        shopcart = ShopcartsFactory()
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        products = self._create_products(1, shopcart.user_id)
+        product = products[0]
+        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        new_product = Products(user_id=product.user_id, product_id=product.product_id, price=15.0,
+         time=date.today(), quantity=16.0, name="new")
+        resp = self.app.put(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}",
+         json=new_product.serialize())
+        data = resp.get_json()
+        self.assertEqual(data["user_id"], new_product.user_id)
+        self.assertEqual(data["product_id"], new_product.product_id)
+        self.assertEqual(data["name"], new_product.name)
+        self.assertEqual(data["time"], new_product.time.isoformat())
+        self.assertEqual(data["quantity"], new_product.quantity)
+        self.assertEqual(data["price"], new_product.price)
+        # Fetch it back
+        logging.debug("Test Shopcart: %s", shopcart.serialize())
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}",
+         json=new_product.serialize())
+        data = resp.get_json()
+        self.assertEqual(data["user_id"], new_product.user_id)
+        self.assertEqual(data["product_id"], new_product.product_id)
+        self.assertEqual(data["name"], new_product.name)
+        self.assertEqual(data["time"], new_product.time.isoformat())
+        self.assertEqual(data["quantity"], new_product.quantity)
+        self.assertEqual(data["price"], new_product.price)
 
     ######################################################################
     #  T E S T   S A D   P A T H S
