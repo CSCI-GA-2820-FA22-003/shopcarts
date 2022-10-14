@@ -216,6 +216,18 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data["quantity"], new_product.quantity)
         self.assertEqual(data["price"], new_product.price)
 
+    def test_delete_a_product(self):
+        """ It should Delete a Product from the shopcart """
+        shopcart = ShopcartsFactory()
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        products = self._create_products(1, shopcart.user_id)
+        product = products[0]
+        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(Products.all()), 1)
+        resp = self.app.delete(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}")
+        self.assertEqual(len(Products.all()), 0)
+
     ######################################################################
     #  T E S T   S A D   P A T H S
     ######################################################################
@@ -225,12 +237,27 @@ class TestYourResourceServer(TestCase):
         response = self.app.post("/shopcarts", json={})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_create_pet_no_content_type(self):
+    def test_create_shopcart_no_content_type(self):
         """It should not Create a Shopcart with no content type"""
         response = self.app.post("/shopcarts")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    def test_create_pet_no_content_type_with_header(self):
-        """It should not Create a Shopcart with no content type"""
+    def test_create_shopcart_wrong_content_type(self):
+        """It should not Create a Shopcart with wrong content type"""
         response = self.app.post("/shopcarts", headers={"Content-Type": "application/haha"})
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_unsupported_method(self):
+        response = self.app.put("/shopcarts")
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_create_product_wrong_data(self):
+        """It should not Create a Shopcart with missing data"""
+        product = Products(user_id="1", product_id="2", price=-1.0,
+         time=date.today(), quantity=16.0, name="new")
+        response = self.app.post("/shopcarts/1/items", json=product.serialize())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        product = Products(user_id="1", product_id="2", price=1.0,
+         time=date.today(), quantity=0, name="new")
+        response = self.app.post("/shopcarts/1/items", json=product.serialize())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
