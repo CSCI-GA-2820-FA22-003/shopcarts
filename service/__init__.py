@@ -15,9 +15,10 @@ app.config.from_object(config)
 
 # Dependencies require we import the routes AFTER the Flask app is created
 # pylint: disable=wrong-import-position, wrong-import-order
-from service import routes, models        # noqa: E402, E261
+from service import routes        # noqa: E402, E261
 # pylint: disable=wrong-import-position
 from .common import cli_commands, error_handlers  # noqa: F401 E402
+from .models import Products, Shopcarts
 
 # Set up logging for production
 log_handlers.init_logging(app, "gunicorn.error")
@@ -27,7 +28,9 @@ app.logger.info("  S E R V I C E   R U N N I N G  ".center(70, "*"))
 app.logger.info(70 * "*")
 
 try:
-    routes.init_db()  # make our SQLAlchemy tables
+    # make our SQLAlchemy tables
+    Products.init_db(app)  
+    Shopcarts.init_db(app)
 except Exception as error:
     app.logger.critical("%s: Cannot continue", error)
     # gunicorn requires exit code 4 to stop spawning workers when they die

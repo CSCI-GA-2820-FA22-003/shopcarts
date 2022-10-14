@@ -10,9 +10,14 @@ import logging
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from service import app
-from service.models import db
-from service.common import status  # HTTP Status Codes
+from service.models import db, Products, Shopcarts, init_db
+from service.common import status
+from tests.factories import ShopcartsFactory  # HTTP Status Codes
 
+TEST_USER = "foo"
+DATABASE_URI = os.getenv(
+    "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/testdb"
+)
 
 ######################################################################
 #  T E S T   C A S E S
@@ -23,20 +28,28 @@ class TestYourResourceServer(TestCase):
     @classmethod
     def setUpClass(cls):
         """ This runs once before the entire test suite """
-        pass
+        app.config["TESTING"] = True
+        app.config["DEBUG"] = False
+        # Set up the test database
+        app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
+        app.logger.setLevel(logging.CRITICAL)
+        init_db(app)
 
     @classmethod
     def tearDownClass(cls):
         """ This runs once after the entire test suite """
-        pass
+        db.session.close()
 
     def setUp(self):
         """ This runs before each test """
         self.app = app.test_client()
+        db.session.query(Products).delete()  # clean up the last tests
+        db.session.query(Shopcarts).delete()  # clean up the last tests
+        db.session.commit()
 
     def tearDown(self):
         """ This runs after each test """
-        pass
+        db.session.remove()
 
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
@@ -46,3 +59,56 @@ class TestYourResourceServer(TestCase):
         """ It should call the home page """
         resp = self.app.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+    def test_create_shopcarts(self):
+        """ It should Create a Shopcart """
+        shopcart = ShopcartsFactory()
+        logging.debug("Test Shopcart: %s", shopcart.serialize())
+        resp = self.app.post("/shopcarts", json=shopcart.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        data = resp.get_json()
+        self.assertEqual(data["user_id"], shopcart.user_id)
+
+    def test_read_shopcarts(self):
+        """ It should Read a Shopcart """
+        shopcart = ShopcartsFactory()
+        logging.debug("Test Shopcart: %s", shopcart.serialize())
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        data = resp.get_json()
+        self.assertEqual(data["user_id"], shopcart.user_id)
+
+    def test_delete_shopcarts(self):
+        """ It should Delete a Shopcart """
+        shopcart = ShopcartsFactory()
+        logging.debug("Test Shopcart: %s", shopcart.serialize())
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        resp = self.app.delete(f"/shopcarts/{shopcart.user_id}")
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(resp.data), 0)
+        # make sure they are deleted
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_get_shopcart_not_found(self):
+        """It should not Get a Shopcart thats not found"""
+        response = self.app.get("/shopcarts/0")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        data = response.get_json()
+        logging.debug("Response data = %s", data)
+        self.assertIn("was not found", data["message"])
+
+    ######################################################################
+    #  T E S T   S A D   P A T H S
+    ######################################################################
+
+    def test_create_shopcart_no_data(self):
+        """It should not Create a Shopcart with missing data"""
+        response = self.app.post("/shopcarts", json={})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_pet_no_content_type(self):
+        """It should not Create a Shopcart with no content type"""
+        response = self.app.post("/shopcarts")
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)

@@ -9,7 +9,7 @@ from datetime import date
 from werkzeug.exceptions import NotFound
 from service.models import Products, Shopcarts, DataValidationError, db
 from service import app
-from tests.factories import ProductsFactory
+from tests.factories import ProductsFactory, ShopcartsFactory
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/testdb"
@@ -29,6 +29,7 @@ class TestProductsModel(unittest.TestCase):
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
         Products.init_db(app)
+        Shopcarts.init_db(app)
 
     @classmethod
     def tearDownClass(cls):
@@ -161,6 +162,7 @@ class TestProductsModel(unittest.TestCase):
         self.assertEqual(len(Products.all()), 1)
         # delete the product and make sure it isn't in the database
         product.delete()
+        self.assertEqual(len(Shopcarts.all()), 1)
         self.assertEqual(len(Products.all()), 0)
 
     def test_list_all_products(self):
@@ -276,3 +278,164 @@ class TestProductsModel(unittest.TestCase):
     def test_find_or_404_not_found(self):
         """It should return 404 not found"""
         self.assertRaises(NotFound, Products.find_or_404, 0)
+
+    def test_create_shopcart(self):
+        """It should create a shopcart"""
+        shopcart = Shopcarts(user_id="1")
+        self.assertEqual(str(shopcart), "<Shopcarts 1>")
+        self.assertTrue(shopcart is not None)
+        self.assertEqual(shopcart.id, None)
+
+    def test_add_shopcart(self):
+        """It should create a shopcart and add it to the database"""
+        shopcart = Shopcarts(user_id="1")
+        self.assertEqual(str(shopcart), "<Shopcarts 1>")
+        self.assertTrue(shopcart is not None)
+        self.assertEqual(shopcart.id, None)
+        self.assertEqual(len(Shopcarts.all()), 0)
+        shopcart.create()
+        self.assertEqual(len(Shopcarts.all()), 1)
+
+    def test_shopcart_back_ref(self):
+        """It should back reference from shopcart to product"""
+        product = ProductsFactory()
+        shopcart = Shopcarts(user_id=product.user_id)
+        shopcart.create()
+        product.create()
+        self.assertEqual(shopcart.products[0].id, product.id)
+
+    def test_create_duplicated_shopcart(self):
+        """It should return error when creating duplicated shopcarts"""
+        shopcart = Shopcarts(user_id="1")
+        self.assertEqual(str(shopcart), "<Shopcarts 1>")
+        self.assertTrue(shopcart is not None)
+        self.assertEqual(shopcart.id, None)
+        shopcart.create()
+        shopcart = Shopcarts(user_id="1")
+        self.assertEqual(str(shopcart), "<Shopcarts 1>")
+        self.assertTrue(shopcart is not None)
+        self.assertEqual(shopcart.id, None)
+        self.assertRaises(DataValidationError, shopcart.create)
+
+    def test_delete_a_shopcart(self):
+        """It should Delete a Product"""
+        product = ProductsFactory()
+        shopcart = Shopcarts(user_id=product.user_id)
+        shopcart.create()
+        product.create()
+        self.assertEqual(len(Products.all()), 1)
+        self.assertEqual(len(Shopcarts.all()), 1)
+        # delete the shopcart and make sure it isn't in the database
+        shopcart.delete()
+        self.assertEqual(len(Shopcarts.all()), 0)
+        self.assertEqual(len(Products.all()), 0)
+
+    def test_serialize_a_shopcart(self):
+        """It should serialize a Shopcart"""
+        shopcart = ShopcartsFactory()
+        data = shopcart.serialize()
+        self.assertNotEqual(data, None)
+        self.assertIn("id", data)
+        self.assertEqual(data["id"], shopcart.id)
+        self.assertIn("user_id", data)
+        self.assertEqual(data["user_id"], shopcart.user_id)
+        self.assertIn("products", data)
+        self.assertEqual(data["products"], shopcart.products)
+
+    def test_deserialize_a_shopcart(self):
+        """It should de-serialize a Shopcart"""
+        data = ShopcartsFactory().serialize()
+        shopcart = Shopcarts()
+        shopcart.deserialize(data)
+        self.assertNotEqual(shopcart, None)
+        self.assertEqual(shopcart.id, None)
+        self.assertEqual(shopcart.user_id, data["user_id"])
+
+    def test_deserialize_missing_shopcart_data(self):
+        """It should not deserialize a Shopcart with missing data"""
+        data = {"id": 1}
+        shopcart = Shopcarts()
+        self.assertRaises(DataValidationError, shopcart.deserialize, data)
+
+    def test_deserialize_bad_shopcart_data(self):
+        """It should not deserialize bad data"""
+        data = "this is not a dictionary"
+        shopcart = Shopcarts()
+        self.assertRaises(DataValidationError, shopcart.deserialize, data)
+
+    def test_update_a_shopcart(self):
+        """It should Update a Shopcart"""
+        shopcart = ShopcartsFactory()
+        logging.debug(shopcart)
+        shopcart.id = None
+        shopcart.create()
+        old_product = Products(user_id=shopcart.user_id, product_id="1", name="Pen",
+         price=1, time=date(2011,1,2), quantity=1)
+        old_product.create()
+        old_products = []
+        old_products.append(old_product)
+        self.assertEqual(shopcart.products, old_products)
+        self.assertIsNotNone(shopcart.id)
+        # Change it an save it
+        new_products = []
+        new_products.append(Products(user_id=shopcart.user_id, product_id="2", name="Pig",
+         price=1, time=date(2011,1,2), quantity=1))
+        for old_product in shopcart.products:
+            old_product.delete()
+        original_id = shopcart.id
+        for product in new_products:
+            product.create()
+        self.assertEqual(shopcart.id, original_id)
+        self.assertEqual(shopcart.products, new_products)
+        # Fetch it back and make sure the id hasn't changed
+        # but the data did change
+        shopcarts = Shopcarts.all()
+        self.assertEqual(len(shopcarts), 1)
+        self.assertEqual(shopcarts[0].id, original_id)
+        self.assertEqual(shopcarts[0].products, new_products)
+
+    def test_update_shopcart_no_id(self):
+        """It should not Update a Shopcart with no id"""
+        shopcart = ShopcartsFactory()
+        logging.debug(shopcart)
+        shopcart.id = None
+        self.assertRaises(DataValidationError, shopcart.update)
+
+    def test_find_or_404_found_shopcart(self):
+        """It should Find or return 404 not found"""
+        shopcarts = ShopcartsFactory.create_batch(3)
+        for shopcart in shopcarts:
+            if len(Shopcarts.find_by_user_id(shopcart.user_id).all())==0:
+                shopcart.create()
+                for product in shopcart.products:
+                    product.create()
+            else:
+                for old_product in Shopcarts.find_by_user_id(shopcart.user_id).all()[0].products:
+                    old_product.delete()
+                for product in shopcart.products:
+                    product.create()
+
+        shopcart = Shopcarts.find_or_404(shopcarts[0].id)
+        self.assertIsNot(shopcart, None)
+        self.assertEqual(shopcart.id, shopcarts[0].id)
+        self.assertEqual(shopcart.products, shopcarts[0].products)
+        self.assertEqual(shopcart.user_id, shopcarts[0].user_id)
+
+    def test_find_or_404_not_found_shopcart(self):
+        """It should return 404 not found"""
+        self.assertRaises(NotFound, Shopcarts.find_or_404, 0)
+
+    def test_read_a_shopcart(self):
+        """It should Read a Shopcart"""
+        shopcart = ShopcartsFactory()
+        logging.debug(shopcart)
+        shopcart.id = None
+        shopcart.create()
+        for product in shopcart.products:
+            product.create()
+        self.assertIsNotNone(shopcart.id)
+        # Fetch it back
+        found_shopcart = Shopcarts.find(shopcart.id)
+        self.assertEqual(found_shopcart.id, shopcart.id)
+        self.assertEqual(found_shopcart.user_id, shopcart.user_id)
+        self.assertEqual(found_shopcart.products, shopcart.products)

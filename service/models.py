@@ -18,6 +18,7 @@ db = SQLAlchemy()
 def init_db(app):
     """Initialize the SQLAlchemy app"""
     Products.init_db(app)
+    Shopcarts.init_db(app)
 
 
 class DataValidationError(Exception):
@@ -50,6 +51,62 @@ class Shopcarts(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def update(self):
+        """
+        Updates a Shopcart in the database
+        """
+        logger.info("Saving %s", self.user_id)
+        if not self.id:
+            raise DataValidationError("Update called with empty ID field")
+        db.session.commit()
+
+    def delete(self):
+        """ Removes a Shopcart from the data store """
+        logger.info("Deleting %s", self.user_id)
+        products_in_shopcart = self.products
+        for product in products_in_shopcart:
+            logger.info("Deleting %s", product.name)
+            db.session.delete(product)
+        db.session.delete(self)
+        db.session.commit()
+
+    def serialize(self):
+        """ Serializes a Shopcart into a dictionary """
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "products": self.products
+            }
+
+    def deserialize(self, data):
+        """
+        Deserializes a Shopcart from a dictionary
+        Args:
+            data (dict): A dictionary containing the resource data
+        """
+        try:
+            self.user_id = data["user_id"]
+            if "products" in data:
+                self.products = data["products"]
+            else:
+                self.products = []
+        except KeyError as error:
+            raise DataValidationError(
+                "Invalid Products: missing " + error.args[0]
+            ) from error
+        except TypeError as error:
+            raise DataValidationError(
+                "Invalid Products: body of request contained bad or no data - "
+                "Error message: " + str(error)
+            ) from error
+        return self
+
+    @classmethod
+    def init_db(cls, app):
+        """ Initializes the database session """
+        logger.info("Initializing database")
+        cls.app = app
+
     @classmethod
     def find_by_user_id(cls, user_id):
         """Returns all Products with the given name
@@ -59,6 +116,29 @@ class Shopcarts(db.Model):
         """
         logger.info("Processing name query for %s ...", user_id)
         return cls.query.filter(cls.user_id == user_id)
+
+    @classmethod
+    def all(cls):
+        """ Returns all of the Products in the database """
+        logger.info("Processing all Products")
+        return cls.query.all()
+
+    @classmethod
+    def find(cls, by_id):
+        """ Finds a Shopcart by it's ID """
+        logger.info("Processing lookup for id %s ...", by_id)
+        return cls.query.get(by_id)
+
+    @classmethod
+    def find_or_404(cls, user_id):
+        """Find a Shopcart by it's id
+        :param user_id: the id of the shopcart to find
+        :type user_id: Int
+        :return: an instance with the id, or 404_NOT_FOUND if not found
+        :rtype: Shopcarts
+        """
+        logger.info("Processing lookup or 404 for id %s ...", user_id)
+        return cls.query.get_or_404(user_id)
 
 class Products(db.Model):
     """

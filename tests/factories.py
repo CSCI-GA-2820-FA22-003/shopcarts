@@ -5,7 +5,7 @@ from datetime import date
 
 import factory
 from factory.fuzzy import FuzzyChoice, FuzzyDate
-from service.models import Products
+from service.models import Products, Shopcarts
 
 
 class ProductsFactory(factory.Factory):
@@ -23,3 +23,14 @@ class ProductsFactory(factory.Factory):
     quantity = FuzzyChoice(choices=[1.0, 2.0, 3.0, 4.0])
     price = FuzzyChoice(choices=[1.0, 2.0, 3.0, 4.0])
     time = FuzzyDate(date(2020, 1, 1))
+
+class ShopcartsFactory(factory.Factory):
+    """Creates fake shopcarts"""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Maps factory to data model"""
+
+        model = Shopcarts
+
+    id = factory.Sequence(lambda n: n)
+    user_id = FuzzyChoice(choices=["1", "2", "3", "4"])
