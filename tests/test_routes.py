@@ -14,6 +14,8 @@ from service import app
 from service.models import db, Products, Shopcarts, init_db
 from service.common import status
 from tests.factories import ShopcartsFactory  # HTTP Status Codes
+import datetime
+import random
 
 TEST_USER = "foo"
 DATABASE_URI = os.getenv(
@@ -69,6 +71,23 @@ class TestYourResourceServer(TestCase):
             shopcarts.append(test_shopcart)
         return shopcarts
 
+    def random_date(self, start_date, end_date):
+        """Generate a random datetime between `start` and `end`"""
+        days_between_dates = (end_date - start_date).days
+        random_number_of_days = random.randrange(days_between_dates)
+        return start_date + datetime.timedelta(days=random_number_of_days)
+
+    def _make_products(self, count, user_id):
+        """Factory method to create products in bulk under one user_id"""
+        products = []
+        for i in range(count):
+            test_product = Products(user_id=user_id, product_id=str(i),
+            name="test"+str(i), quantity=random.randint(1, 100),
+            price=round(random.uniform(0.01, 100.00), 2),
+            time=self.random_date(date(2000,1,1),date(2022,10,1)))
+            products.append(test_product.serialize())
+        return products
+    
     def _create_products(self, count, user_id):
         """Factory method to create products in bulk under one user_id"""
         products = []
@@ -111,6 +130,43 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(data["user_id"], shopcart.user_id)
+    
+    def test_update_shopcart(self):
+        """ It should update a Shopcart """
+        shopcart = ShopcartsFactory()
+
+        # create a shopcart
+        self.app.post("/shopcarts", json=shopcart.serialize())
+
+        # make product data
+        product_num = 100
+        products = self._make_products(2*product_num, shopcart.user_id)
+
+        # update old shopcart
+        resp = self.app.put(f"/shopcarts/{shopcart.user_id}", json=products[:product_num])
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        
+        # update shopcart
+        resp = self.app.put(f"/shopcarts/{shopcart.user_id}", json=products[product_num:])
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+
+        # get updated shopcart items
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items")
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        newdata = resp.get_json()
+
+        # check whether the products have been added
+        self.assertEqual(len(newdata), product_num)
+        for i in range(1,product_num+1):
+            curr_newdata = newdata[-i]
+            curr_product = Products()
+            curr_product.deserialize(products[-i])
+            self.assertEqual(curr_newdata["user_id"], curr_product.user_id)
+            self.assertEqual(curr_newdata["product_id"], curr_product.product_id)
+            self.assertEqual(curr_newdata["name"], curr_product.name)
+            self.assertEqual(curr_newdata["time"], curr_product.time.isoformat())
+            self.assertEqual(curr_newdata["quantity"], curr_product.quantity)
+            self.assertEqual(curr_newdata["price"], curr_product.price)
 
     def test_get_shopcart_not_found(self):
         """It should not Get a Shopcart thats not found"""
