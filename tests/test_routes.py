@@ -82,7 +82,7 @@ class TestYourResourceServer(TestCase):
         products = []
         for i in range(count):
             test_product = Products(user_id=user_id, product_id=str(i),
-            name="test"+str(i), quantity=random.randint(1, 100),
+            name="test"+str(i), quantity=float(random.randint(1, 100)),
             price=round(random.uniform(0.01, 100.00), 2),
             time=self.random_date(date(2000,1,1),date(2022,10,1)))
             products.append(test_product.serialize())
