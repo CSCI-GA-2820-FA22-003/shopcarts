@@ -107,6 +107,10 @@ def add_a_product(user_id):
     product = Products()
     check_content_type("application/json")
     product.deserialize(request.get_json())
+    if product.price < 0:
+        abort(status.HTTP_400_BAD_REQUEST, f"Price should not be negative")
+    elif product.quantity <= 0:
+        abort(status.HTTP_400_BAD_REQUEST, f"Quantity should be positive")
     product.create()
     app.logger.info(f"Product {product.product_id} created in shopcart {user_id}")
 
@@ -173,12 +177,36 @@ def update_a_product(user_id, product_id):
     originial_id = products[0].id
     product = products[0]
     product.deserialize(request.get_json())
+    if product.price < 0:
+        abort(status.HTTP_400_BAD_REQUEST, f"Price should not be negative")
+    elif product.quantity <= 0:
+        abort(status.HTTP_400_BAD_REQUEST, f"Quantity should be positive")
     product.id = originial_id
     product.update()
 
     app.logger.info("Product %s in shopcart %s was updated.", product_id, user_id)
     return jsonify(product.serialize()), status.HTTP_200_OK
 
+######################################################################
+# DELETE A PRODUCT
+######################################################################
+@app.route("/shopcarts/<user_id>/items/<product_id>", methods=["DELETE"])
+def delete_a_product(user_id, product_id):
+    """Update a product in the shopcart"""
+    app.logger.info(f"Delete a product {product_id} in the shopcart {user_id}")
+    products = Products.find_by_user_id_product_id(user_id, product_id).all()
+
+    if len(products) == 0:
+        abort(status.HTTP_404_NOT_FOUND,
+         f"Product with id {product_id} was not found in shopcart {user_id}.")
+
+    # Return the list of products
+    app.logger.info("Deleting product")
+    product = products[0]
+    product.delete()
+
+    app.logger.info("Product %s in shopcart %s was deleted.", product_id, user_id)
+    return "", status.HTTP_204_NO_CONTENT
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
