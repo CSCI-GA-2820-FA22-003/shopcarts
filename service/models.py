@@ -72,10 +72,13 @@ class Shopcarts(db.Model):
 
     def serialize(self):
         """ Serializes a Shopcart into a dictionary """
+        product_list = []
+        for product in self.products:
+            product_list.append(product.serialize())
         return {
             "id": self.id,
             "user_id": self.user_id,
-            "products": self.products
+            "products": product_list
             }
 
     def deserialize(self, data):
