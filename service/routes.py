@@ -221,6 +221,8 @@ def delete_a_product(user_id, product_id):
     Args:
         user_id (str): the user_id of the shopcart
         product_id (str): the product_id of the product
+    Returns:
+        str: always returns an empty string
     """
     app.logger.info(f"Delete a product {product_id} in the shopcart {user_id}")
     products = Products.find_by_user_id_product_id(user_id, product_id).all()
