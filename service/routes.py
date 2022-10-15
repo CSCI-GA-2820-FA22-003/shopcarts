@@ -155,6 +155,30 @@ def list_all_products(user_id):
         serialized_products.append(product.serialize())
     return jsonify(serialized_products), status.HTTP_200_OK
 
+######################################################################
+# UPDATE A PRODUCT
+######################################################################
+@app.route("/shopcarts/<user_id>/items/<product_id>", methods=["PUT"])
+def update_a_product(user_id, product_id):
+    """Update a product in the shopcart"""
+    app.logger.info(f"Read a product {product_id} in the shopcart {user_id}")
+    products = Products.find_by_user_id_product_id(user_id, product_id).all()
+
+    if len(products) == 0:
+        abort(status.HTTP_404_NOT_FOUND,
+         f"Product with id {product_id} was not found in shopcart {user_id}.")
+
+    # Return the list of products
+    app.logger.info("Updating product")
+    originial_id = products[0].id
+    product = products[0]
+    product.deserialize(request.get_json())
+    product.id = originial_id
+    product.update()
+
+    app.logger.info("Product %s in shopcart %s was updated.", product_id, user_id)
+    return jsonify(product.serialize()), status.HTTP_200_OK
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
