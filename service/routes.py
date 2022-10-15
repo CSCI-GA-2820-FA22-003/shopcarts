@@ -107,24 +107,26 @@ def update_a_shopcart(user_id):
     Returns:
         dict: the shopcart and it's value
     """
-    
+
     app.logger.info(f"Request to update a shopcart for {user_id}")
     check_content_type("application/json")
     shopcarts = Shopcarts.find_by_user_id(user_id).all()
 
-    if len(shopcarts) != 0:
-        shopcarts[0].delete()
+    if len(shopcarts) == 0:
+        abort(status.HTTP_404_NOT_FOUND,
+         f"Shopcart {user_id} was not found.")
 
-    shopcart = Shopcarts(user_id=user_id)
-    shopcart.create()
-    
+    shopcart = shopcarts[0]
+
+    for product in shopcart.products:
+        product.delete()
+
     for req in request.get_json():
         # Create a product
         product = Products()
         product.deserialize(req)
         product.create()
-        shopcart.products.append(product)
-    
+
     return jsonify(shopcart.serialize()),status.HTTP_201_CREATED
 
 ######################################################################
