@@ -286,3 +286,14 @@ class Products(db.Model):
         """
         logger.info("Processing lookup or 404 for id %s ...", product_id)
         return cls.query.get_or_404(product_id)
+
+    @classmethod
+    def find_by_user_id(cls, user_id):
+        """Returns all Products with the given name
+
+        Args:
+            name (string): the name of the Products you want to match
+        """
+        logger.info("Processing user_id query for %s ...", user_id)
+        return cls.query.filter(cls.user_id == user_id)
+        
