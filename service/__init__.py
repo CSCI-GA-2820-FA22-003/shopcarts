@@ -15,7 +15,7 @@ app.config.from_object(config)
 
 # Dependencies require we import the routes AFTER the Flask app is created
 # pylint: disable=wrong-import-position, wrong-import-order
-from service import routes        # noqa: E402, E261
+from service import routes       # noqa: E402, E261
 # pylint: disable=wrong-import-position
 from .common import cli_commands, error_handlers  # noqa: F401 E402
 from .models import Products, Shopcarts
@@ -28,8 +28,7 @@ app.logger.info("  S E R V I C E   R U N N I N G  ".center(70, "*"))
 app.logger.info(70 * "*")
 
 try:
-    # make our SQLAlchemy tables
-    Products.init_db(app)  
+    Products.init_db(app)  # make our SQLAlchemy tables  
     Shopcarts.init_db(app)
 except Exception as error:
     app.logger.critical("%s: Cannot continue", error)

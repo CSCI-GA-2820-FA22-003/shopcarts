@@ -95,19 +95,61 @@ def delete_a_shopcart(user_id):
     """
     app.logger.info(f"Request to Delete shopcart {user_id}...")
 
-    # See if the shopcart already exists and send an error if it does
-    shopcarts = Shopcarts.find_by_user_id(user_id)
-    if shopcarts:
-        shopcarts.delete()
+    shopcarts = Shopcarts.find_by_user_id(user_id).all()
+    if len(shopcarts) != 0:
+        for shopcart in shopcarts:
+            shopcart.delete()
 
     # Set the location header and return the new counter
     app.logger.info("Shopcart %s delete complete", user_id)
     return "", status.HTTP_204_NO_CONTENT
 
 ######################################################################
+# ADD A PRODUCT
+######################################################################
+@app.route("/shopcarts/<user_id>/items", methods=["POST"])
+def add_a_product(user_id):
+    """Add a product to the shopcart"""
+    app.logger.info("Add a product into the shopcart")
+    product = Products()
+    check_content_type("application/json")
+    product.deserialize(request.get_json())
+    if product.price < 0:
+        abort(status.HTTP_400_BAD_REQUEST, f"Price should not be negative")
+    elif product.quantity <= 0:
+        abort(status.HTTP_400_BAD_REQUEST, f"Quantity should be positive")
+    product.create()
+    app.logger.info(f"Product {product.product_id} created in shopcart {user_id}")
+
+    # Set the location header and return the new product
+    location_url = url_for("read_a_product", user_id=user_id,
+     product_id=product.product_id, _external=True)
+    return (
+        jsonify(product.serialize()),
+        status.HTTP_201_CREATED,
+        {"Location": location_url},
+    )
+
+######################################################################
+# READ A PRODUCT
+######################################################################
+@app.route("/shopcarts/<user_id>/items/<product_id>", methods=["GET"])
+def read_a_product(user_id, product_id):
+    """Read a product in the shopcart"""
+    app.logger.info(f"Read a product {product_id} in the shopcart {user_id}")
+    products = Products.find_by_user_id_product_id(user_id, product_id).all()
+
+    if len(products) == 0:
+        abort(status.HTTP_404_NOT_FOUND,
+         f"Product with id {product_id} was not found in shopcart {user_id}.")
+
+    # Return the new shopcart
+    app.logger.info("Returning product: %s", product_id)
+    return jsonify(products[0].serialize()), status.HTTP_200_OK
+
+######################################################################
 #  U T I L I T Y   F U N C T I O N S
 ######################################################################
-
 
 def check_content_type(content_type):
     """Checks that the media type is correct"""

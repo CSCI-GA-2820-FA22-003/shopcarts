@@ -7,6 +7,7 @@ Test cases can be run with the following:
 """
 import os
 import logging
+from datetime import date
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from service import app
@@ -38,6 +39,9 @@ class TestYourResourceServer(TestCase):
     @classmethod
     def tearDownClass(cls):
         """ This runs once after the entire test suite """
+        db.drop_all()
+        db.create_all()
+        db.session.commit()
         db.session.close()
 
     def setUp(self):
@@ -50,6 +54,35 @@ class TestYourResourceServer(TestCase):
     def tearDown(self):
         """ This runs after each test """
         db.session.remove()
+
+    def _create_shopcarts(self, count):
+        """Factory method to create shopcarts in bulk"""
+        shopcarts = []
+        for i in range(count):
+            test_shopcart = Shopcarts(user_id=str(i))
+            response = self.app.post("/shopcarts", json=test_shopcart.serialize())
+            self.assertEqual(
+                response.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
+            )
+            new_shopcart = response.get_json()
+            test_shopcart.id = new_shopcart["id"]
+            shopcarts.append(test_shopcart)
+        return shopcarts
+
+    def _create_products(self, count, user_id):
+        """Factory method to create products in bulk under one user_id"""
+        products = []
+        for i in range(count):
+            test_product = Products(user_id=user_id, product_id=str(i),
+             name="test"+str(i), quantity=1.0, price=1.0, time=date(2011,1,1))
+            response = self.app.post(f"/shopcarts/{user_id}/items", json=test_product.serialize())
+            self.assertEqual(
+                response.status_code, status.HTTP_201_CREATED, "Could not create test product"
+            )
+            new_product = response.get_json()
+            test_product.id = new_product["id"]
+            products.append(test_product)
+        return products
 
     ######################################################################
     #  P L A C E   T E S T   C A S E S   H E R E
@@ -84,12 +117,19 @@ class TestYourResourceServer(TestCase):
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
         self.app.post("/shopcarts", json=shopcart.serialize())
+        products = self._create_products(1, shopcart.user_id)
+        product = products[0]
+        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(Products.all()), 1)
         resp = self.app.delete(f"/shopcarts/{shopcart.user_id}")
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(resp.data), 0)
-        # make sure they are deleted
+        # make sure shopcart is deleted
         resp = self.app.get(f"/shopcarts/{shopcart.user_id}")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        # make sure product is deleted
+        self.assertEqual(len(Products.all()), 0)
 
     def test_get_shopcart_not_found(self):
         """It should not Get a Shopcart thats not found"""
@@ -98,6 +138,22 @@ class TestYourResourceServer(TestCase):
         data = response.get_json()
         logging.debug("Response data = %s", data)
         self.assertIn("was not found", data["message"])
+
+    def test_read_a_product(self):
+        """ It should Read a Product """
+        shopcart = ShopcartsFactory()
+        logging.debug("Test Shopcart: %s", shopcart.serialize())
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        products = self._create_products(5, shopcart.user_id)
+        for product in products:
+            resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+            resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}")
+            self.assertEqual(resp.status_code, status.HTTP_200_OK)
+            data = resp.get_json()
+            self.assertEqual(data["user_id"], product.user_id)
+            self.assertEqual(data["product_id"], product.product_id)
+            self.assertEqual(data["name"], product.name)
 
     ######################################################################
     #  T E S T   S A D   P A T H S
@@ -112,3 +168,23 @@ class TestYourResourceServer(TestCase):
         """It should not Create a Shopcart with no content type"""
         response = self.app.post("/shopcarts")
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_create_shopcart_wrong_content_type(self):
+        """It should not Create a Shopcart with wrong content type"""
+        response = self.app.post("/shopcarts", headers={"Content-Type": "application/haha"})
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+
+    def test_unsupported_method(self):
+        response = self.app.put("/shopcarts")
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_create_product_wrong_data(self):
+        """It should not Create a Shopcart with missing data"""
+        product = Products(user_id="1", product_id="2", price=-1.0,
+         time=date.today(), quantity=16.0, name="new")
+        response = self.app.post("/shopcarts/1/items", json=product.serialize())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        product = Products(user_id="1", product_id="2", price=1.0,
+         time=date.today(), quantity=0, name="new")
+        response = self.app.post("/shopcarts/1/items", json=product.serialize())
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

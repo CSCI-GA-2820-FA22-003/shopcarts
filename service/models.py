@@ -81,6 +81,7 @@ class Shopcarts(db.Model):
     def deserialize(self, data):
         """
         Deserializes a Shopcart from a dictionary
+        
         Args:
             data (dict): A dictionary containing the resource data
         """
