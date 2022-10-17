@@ -167,6 +167,25 @@ class TestYourResourceServer(TestCase):
             self.assertEqual(curr_newdata["time"], curr_product.time.isoformat())
             self.assertEqual(curr_newdata["quantity"], curr_product.quantity)
             self.assertEqual(curr_newdata["price"], curr_product.price)
+        
+    def test_delete_shopcarts(self):
+        """ It should Delete a Shopcart """
+        shopcart = ShopcartsFactory()
+        logging.debug("Test Shopcart: %s", shopcart.serialize())
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        products = self._create_products(1, shopcart.user_id)
+        product = products[0]
+        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(Products.all()), 1)
+        resp = self.app.delete(f"/shopcarts/{shopcart.user_id}")
+        self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(len(resp.data), 0)
+        # make sure shopcart is deleted
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        # make sure product is deleted
+        self.assertEqual(len(Products.all()), 0)
 
     def test_get_shopcart_not_found(self):
         """It should not Get a Shopcart thats not found"""

@@ -130,6 +130,28 @@ def update_a_shopcart(user_id):
     return jsonify(shopcart.serialize()),status.HTTP_201_CREATED
 
 ######################################################################
+# DELETE A SHOPCART
+######################################################################
+@app.route("/shopcarts/<user_id>", methods=["DELETE"])
+def delete_a_shopcart(user_id):
+    """Deletes a new counter and stores it in the database
+    Args:
+        user_id (str): the user_id of the shopcart to create
+    Returns:
+        dict: the shopcart and it's value
+    """
+    app.logger.info(f"Request to Delete shopcart {user_id}...")
+
+    shopcarts = Shopcarts.find_by_user_id(user_id).all()
+    if len(shopcarts) != 0:
+        for shopcart in shopcarts:
+            shopcart.delete()
+
+    # Set the location header and return the new counter
+    app.logger.info("Shopcart %s delete complete", user_id)
+    return "", status.HTTP_204_NO_CONTENT
+
+######################################################################
 # ADD A PRODUCT
 ######################################################################
 @app.route("/shopcarts/<user_id>/items", methods=["POST"])
