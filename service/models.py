@@ -44,7 +44,7 @@ class Shopcarts(db.Model):
         """
         logger.info("Creating %s", self.user_id)
         shopcarts = self.find_by_user_id(self.user_id)
-        if len(shopcarts.all())>0:
+        if len(shopcarts.all()) > 0:
             raise DataValidationError("Shopcart already exists")
         # pylint: disable=invalid-name
         self.id = None  # id must be none to generate next primary key
@@ -143,6 +143,7 @@ class Shopcarts(db.Model):
         """
         logger.info("Processing lookup or 404 for id %s ...", user_id)
         return cls.query.get_or_404(user_id)
+
 
 class Products(db.Model):
     """
@@ -268,7 +269,7 @@ class Products(db.Model):
             name (string): the name of the Products you want to match
         """
         logger.info("Processing user_id and product_id query for %s and %s ...",
-         user_id, product_id)
+                    user_id, product_id)
         return cls.query.filter(
             and_(
                 cls.user_id == user_id,
@@ -296,4 +297,3 @@ class Products(db.Model):
         """
         logger.info("Processing user_id query for %s ...", user_id)
         return cls.query.filter(cls.user_id == user_id)
-        
