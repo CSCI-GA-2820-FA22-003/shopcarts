@@ -96,7 +96,7 @@ Content-Type: application/json
 
 * **URL**
 
-  POST /shopcarts/<user_id>
+  PUT /shopcarts/<user_id>
 
 * **Request Headers:**
 Content-Type: application/json
