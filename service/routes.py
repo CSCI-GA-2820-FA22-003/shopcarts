@@ -22,14 +22,13 @@ def index():
         status.HTTP_200_OK,
     )
 
-
-######################################################################
+#######################################################################
 # REST API
-######################################################################
+#######################################################################
 
-# -----------------------------------------------------------
+#######################################################################
 # Create shopcarts
-# -----------------------------------------------------------
+#######################################################################
 @app.route("/shopcarts", methods=["POST"])
 def create_shopcarts():
     """Creates a new shopcart and stores it in the database
@@ -61,9 +60,9 @@ def create_shopcarts():
         {"Location": location_url},
     )
 
-# -----------------------------------------------------------
+######################################################################
 # Read a shopcart
-# -----------------------------------------------------------
+######################################################################
 @app.route("/shopcarts/<user_id>", methods=["GET"])
 def read_a_shopcart(user_id):
     """Read a shopcart
@@ -96,6 +95,39 @@ def list_shopcarts():
     results = [shopcart.serialize() for shopcart in shopcarts]
     app.logger.info("Returning %d shopcarts", len(results))
     return jsonify(results), status.HTTP_200_OK
+
+######################################################################
+# UPDATE A SHOPCART
+######################################################################
+@app.route("/shopcarts/<user_id>", methods=["PUT"])
+def update_a_shopcart(user_id):
+    """Update items in shopcart
+    Args:
+        user_id (str): the user_id of the shopcart to update
+    Returns:
+        dict: the shopcart and it's value
+    """
+
+    app.logger.info(f"Request to update a shopcart for {user_id}")
+    check_content_type("application/json")
+    shopcarts = Shopcarts.find_by_user_id(user_id).all()
+
+    if len(shopcarts) == 0:
+        abort(status.HTTP_404_NOT_FOUND,
+         f"Shopcart {user_id} was not found.")
+
+    shopcart = shopcarts[0]
+
+    for product in shopcart.products:
+        product.delete()
+
+    for req in request.get_json():
+        # Create a product
+        product = Products()
+        product.deserialize(req)
+        product.create()
+
+    return jsonify(shopcart.serialize()),status.HTTP_201_CREATED
 
 ######################################################################
 # ADD A PRODUCT
