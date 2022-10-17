@@ -146,11 +146,11 @@ def update_a_shopcart(user_id):
 
 @app.route("/shopcarts/<user_id>", methods=["DELETE"])
 def delete_a_shopcart(user_id):
-    """Deletes a new counter and stores it in the database
+    """Deletes a shopcart
     Args:
-        user_id (str): the user_id of the shopcart to create
+        user_id (str): the user_id of the shopcart to delete
     Returns:
-        dict: the shopcart and it's value
+        str: always returns an empty string
     """
     app.logger.info(f"Request to Delete shopcart {user_id}...")
 
@@ -159,7 +159,7 @@ def delete_a_shopcart(user_id):
         for shopcart in shopcarts:
             shopcart.delete()
 
-    # Set the location header and return the new counter
+    # Return nothing but 204 status code
     app.logger.info("Shopcart %s delete complete", user_id)
     return "", status.HTTP_204_NO_CONTENT
 
