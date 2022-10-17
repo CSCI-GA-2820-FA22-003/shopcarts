@@ -16,10 +16,10 @@ DATABASE_URI = os.getenv(
 )
 
 ######################################################################
-#  Products   M O D E L   T E S T   C A S E S
+#  M O D E L   T E S T   C A S E S
 ######################################################################
 class TestProductsModel(unittest.TestCase):
-    """ Test Cases for Products Model """
+    """ Test Cases for Products and Shopcarts Model """
 
     @classmethod
     def setUpClass(cls):
@@ -34,6 +34,9 @@ class TestProductsModel(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         """ This runs once after the entire test suite """
+        db.drop_all()
+        db.create_all()
+        db.session.commit()
         db.session.close()
 
     def setUp(self):
@@ -285,6 +288,23 @@ class TestProductsModel(unittest.TestCase):
         self.assertEqual(str(shopcart), "<Shopcarts 1>")
         self.assertTrue(shopcart is not None)
         self.assertEqual(shopcart.id, None)
+
+    def test_find_by_user_id_product(self):
+        """It should Find a Product by user_id"""
+        products = ProductsFactory.create_batch(5)
+        for product in products:
+            if len(Shopcarts.find_by_user_id(product.user_id).all())==0:
+                shopcart = Shopcarts(user_id=product.user_id)
+                shopcart.create()
+            product.create()
+        user_id = products[0].user_id
+        found = Products.find_by_user_id(user_id)
+        self.assertEqual(found[0].user_id, products[0].user_id)
+        self.assertEqual(found[0].name, products[0].name)
+        self.assertEqual(found[0].product_id, products[0].product_id)
+        self.assertEqual(found[0].price, products[0].price)
+        self.assertEqual(found[0].quantity, products[0].quantity)
+        self.assertEqual(found[0].time, products[0].time)
 
     def test_add_shopcart(self):
         """It should create a shopcart and add it to the database"""
