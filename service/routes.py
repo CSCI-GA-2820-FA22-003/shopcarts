@@ -87,7 +87,10 @@ def read_a_shopcart(user_id):
 ######################################################################
 @app.route("/shopcarts", methods=["GET"])
 def list_shopcarts():
-    """Returns all of the Shopcarts"""
+    """List all shopcarts
+    Returns:
+        list: the list of all shopcarts and their contents
+    """
     app.logger.info("Request for shopcart list")
     shopcarts = []
     shopcarts = Shopcarts.all()
@@ -156,7 +159,12 @@ def delete_a_shopcart(user_id):
 ######################################################################
 @app.route("/shopcarts/<user_id>/items", methods=["POST"])
 def add_a_product(user_id):
-    """Add a product to the shopcart"""
+    """Add a product to the shopcart
+    Args:
+        user_id (str): the user_id of the shopcart
+    Returns:
+        dict: the added product
+    """
     app.logger.info("Add a product into the shopcart")
     product = Products()
     check_content_type("application/json")
@@ -182,7 +190,13 @@ def add_a_product(user_id):
 ######################################################################
 @app.route("/shopcarts/<user_id>/items/<product_id>", methods=["GET"])
 def read_a_product(user_id, product_id):
-    """Read a product in the shopcart"""
+    """Read a product in the shopcart
+    Args:
+        user_id (str): the user_id of the shopcart
+        product_id (str): the product_id of the product
+    Returns:
+        dict: the product
+    """
     app.logger.info(f"Read a product {product_id} in the shopcart {user_id}")
     products = Products.find_by_user_id_product_id(user_id, product_id).all()
 
@@ -199,7 +213,12 @@ def read_a_product(user_id, product_id):
 ######################################################################
 @app.route("/shopcarts/<user_id>/items", methods=["GET"])
 def list_all_products(user_id):
-    """Read all products in the shopcart"""
+    """Read all products in the shopcart
+    Args:
+        user_id (str): the user_id of the shopcart
+    Returns:
+        list: the list of products in the shopcart
+    """
     shopcarts = Shopcarts.find_by_user_id(user_id).all()
     if len(shopcarts) == 0:
         abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
@@ -218,7 +237,13 @@ def list_all_products(user_id):
 ######################################################################
 @app.route("/shopcarts/<user_id>/items/<product_id>", methods=["PUT"])
 def update_a_product(user_id, product_id):
-    """Update a product in the shopcart"""
+    """Update a product in the shopcart
+    Args:
+        user_id (str): the user_id of the shopcart
+        product_id (str): the product_id of the product
+    Returns:
+        dict: the product
+    """
     app.logger.info(f"Read a product {product_id} in the shopcart {user_id}")
     products = Products.find_by_user_id_product_id(user_id, product_id).all()
 
@@ -246,7 +271,13 @@ def update_a_product(user_id, product_id):
 ######################################################################
 @app.route("/shopcarts/<user_id>/items/<product_id>", methods=["DELETE"])
 def delete_a_product(user_id, product_id):
-    """Update a product in the shopcart"""
+    """Update a product in the shopcart
+    Args:
+        user_id (str): the user_id of the shopcart
+        product_id (str): the product_id of the product
+    Returns:
+        str: always returns an empty string
+    """
     app.logger.info(f"Delete a product {product_id} in the shopcart {user_id}")
     products = Products.find_by_user_id_product_id(user_id, product_id).all()
 
