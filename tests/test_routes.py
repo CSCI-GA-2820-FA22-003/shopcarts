@@ -323,6 +323,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     def test_unsupported_method(self):
+        """It should not alloww unsupported methods"""
         response = self.app.put("/shopcarts")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
 
