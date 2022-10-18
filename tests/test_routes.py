@@ -120,6 +120,13 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         data = resp.get_json()
         self.assertEqual(data["user_id"], shopcart.user_id)
+    
+    def  test_create_shopcarts_409_conflicts(self):
+        """ It should return a 409_conflicts """
+        shopcart = ShopcartsFactory()
+        resp = self.app.post("/shopcarts", json=shopcart.serialize())
+        resp = self.app.post("/shopcarts", json=shopcart.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_409_CONFLICT)
 
     def test_read_shopcarts(self):
         """ It should Read a Shopcart """
@@ -130,6 +137,21 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(data["user_id"], shopcart.user_id)
+    
+    def test_update_shopcart_404_not_found(self):
+        """ It should return a 404 not found """
+        shopcart = ShopcartsFactory()
+
+        # create a shopcart
+        self.app.post("/shopcarts", json=shopcart.serialize())
+
+        # make product data
+        product_num = 100
+        products = self._make_products(2*product_num, shopcart.user_id)
+
+        # update old shopcart
+        resp = self.app.put(f"/shopcarts/{shopcart.user_id}+10", json=products[:product_num])
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
     
     def test_update_shopcart(self):
         """ It should update a Shopcart """
@@ -186,6 +208,18 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         # make sure product is deleted
         self.assertEqual(len(Products.all()), 0)
+
+    def test_list_all_products_404_not_found(self):
+        """ It should return a 404 not found """
+        shopcart = ShopcartsFactory()
+        logging.debug("Test Shopcart 404 not found: %s", shopcart.serialize())
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        products = self._create_products(5, shopcart.user_id)
+        for product in products:
+            resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+            self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}+10/items")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_shopcart_not_found(self):
         """It should not Get a Shopcart thats not found"""
@@ -290,6 +324,26 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data["time"], new_product.time.isoformat())
         self.assertEqual(data["quantity"], new_product.quantity)
         self.assertEqual(data["price"], new_product.price)
+
+    def test_update_a_product_400_BAD_REQUEST(self):
+        """ It should return 400 bad request """
+        shopcart = ShopcartsFactory()
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        products = self._create_products(1, shopcart.user_id)
+        product = products[0] 
+        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        new_product = Products(user_id=product.user_id, product_id=product.product_id, price=-15.0,
+         time=date.today(), quantity=16.0, name="new")
+        resp = self.app.put(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}",
+         json=new_product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+        new_product = Products(user_id=product.user_id, product_id=product.product_id, price=15.0,
+         time=date.today(), quantity=-1.0, name="new")
+        resp = self.app.put(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}",
+         json=new_product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
+
 
     def test_delete_a_product(self):
         """ It should Delete a Product from the shopcart """
