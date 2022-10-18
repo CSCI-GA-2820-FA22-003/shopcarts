@@ -122,6 +122,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data["user_id"], shopcart.user_id)
     
     def  test_create_shopcarts_409_conflicts(self):
+        """ It should return 409 conflicts """
         shopcart = ShopcartsFactory()
         resp = self.app.post("/shopcarts", json=shopcart.serialize())
         resp = self.app.post("/shopcarts", json=shopcart.serialize())
@@ -175,6 +176,7 @@ class TestYourResourceServer(TestCase):
             self.assertEqual(curr_newdata["price"], curr_product.price)
     
     def test_update_shopcart_404_not_found(self):
+        """ It should return 404 not found """
         shopcart = ShopcartsFactory()
 
         # create a shopcart
@@ -282,6 +284,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(len(data), 5)
 
     def test_list_all_products_404_not_found(self):
+        """ It should return 404 not found """
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart 404 not found: %s", shopcart.serialize())
         self.app.post("/shopcarts", json=shopcart.serialize())
@@ -324,10 +327,11 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data["price"], new_product.price)
     
     def test_update_a_product_400_BAD_REQUEST(self):
+        """ It should return 400 bad request """
         shopcart = ShopcartsFactory()
         self.app.post("/shopcarts", json=shopcart.serialize())
         products = self._create_products(1, shopcart.user_id)
-        product = products[0]
+        product = products[0] 
         resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         new_product = Products(user_id=product.user_id, product_id=product.product_id, price=-15.0,
