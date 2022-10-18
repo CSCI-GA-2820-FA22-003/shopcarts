@@ -324,7 +324,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data["time"], new_product.time.isoformat())
         self.assertEqual(data["quantity"], new_product.quantity)
         self.assertEqual(data["price"], new_product.price)
-    
+
     def test_update_a_product_400_BAD_REQUEST(self):
         """ It should return 400 bad request """
         shopcart = ShopcartsFactory()
