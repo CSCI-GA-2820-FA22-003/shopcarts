@@ -152,7 +152,7 @@ class TestYourResourceServer(TestCase):
         # update old shopcart
         resp = self.app.put(f"/shopcarts/{shopcart.user_id}+10", json=products[:product_num])
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
-    
+
     def test_update_shopcart(self):
         """ It should update a Shopcart """
         shopcart = ShopcartsFactory()
@@ -161,16 +161,16 @@ class TestYourResourceServer(TestCase):
         self.app.post("/shopcarts", json=shopcart.serialize())
 
         # make product data
-        product_num = 100
+        product_num = 5
         products = self._make_products(2*product_num, shopcart.user_id)
 
         # update old shopcart
         resp = self.app.put(f"/shopcarts/{shopcart.user_id}", json=products[:product_num])
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
         # update shopcart
         resp = self.app.put(f"/shopcarts/{shopcart.user_id}", json=products[product_num:])
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
         # get updated shopcart items
         resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items")
@@ -189,7 +189,7 @@ class TestYourResourceServer(TestCase):
             self.assertEqual(curr_newdata["time"], curr_product.time.isoformat())
             self.assertEqual(curr_newdata["quantity"], curr_product.quantity)
             self.assertEqual(curr_newdata["price"], curr_product.price)
-        
+
     def test_delete_shopcarts(self):
         """ It should Delete a Shopcart """
         shopcart = ShopcartsFactory()
