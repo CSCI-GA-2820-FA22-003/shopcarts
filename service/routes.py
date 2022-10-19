@@ -137,7 +137,7 @@ def update_a_shopcart(user_id):
         product.deserialize(req)
         product.create()
 
-    return jsonify(shopcart.serialize()), status.HTTP_201_CREATED
+    return jsonify(shopcart.serialize()), status.HTTP_200_OK
 
 ######################################################################
 # DELETE A SHOPCART
@@ -300,14 +300,11 @@ def delete_a_product(user_id, product_id):
     app.logger.info(f"Delete a product {product_id} in the shopcart {user_id}")
     products = Products.find_by_user_id_product_id(user_id, product_id).all()
 
-    if len(products) == 0:
-        abort(status.HTTP_404_NOT_FOUND,
-              f"Product with id {product_id} was not found in shopcart {user_id}.")
-
-    # Return the list of products
     app.logger.info("Deleting product")
-    product = products[0]
-    product.delete()
+    if len(products) != 0:
+        # Return the list of products
+        product = products[0]
+        product.delete()
 
     app.logger.info("Product %s in shopcart %s was deleted.", product_id, user_id)
     return "", status.HTTP_204_NO_CONTENT
