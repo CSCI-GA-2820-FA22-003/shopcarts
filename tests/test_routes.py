@@ -356,6 +356,9 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(len(Products.all()), 1)
         resp = self.app.delete(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}")
         self.assertEqual(len(Products.all()), 0)
+        # make sure the product is deleted
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}")
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     ######################################################################
     #  T E S T   S A D   P A T H S
