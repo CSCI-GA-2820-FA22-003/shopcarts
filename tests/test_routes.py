@@ -10,12 +10,12 @@ import logging
 from datetime import date
 from unittest import TestCase
 # from unittest.mock import MagicMock, patch
+import datetime
+import random
 from service import app
 from service.models import db, Products, Shopcarts, init_db
 from service.common import status
 from tests.factories import ShopcartsFactory  # HTTP Status Codes
-import datetime
-import random
 
 TEST_USER = "foo"
 DATABASE_URI = os.getenv(
@@ -27,6 +27,7 @@ DATABASE_URI = os.getenv(
 ######################################################################
 
 
+# pylint: disable=too-many-public-methods
 class TestYourResourceServer(TestCase):
     """ REST API Server Tests """
 
@@ -73,7 +74,7 @@ class TestYourResourceServer(TestCase):
             shopcarts.append(test_shopcart)
         return shopcarts
 
-    def random_date(self, start_date, end_date):
+    def _random_date(self, start_date, end_date):
         """Generate a random datetime between `start` and `end`"""
         days_between_dates = (end_date - start_date).days
         random_number_of_days = random.randrange(days_between_dates)
@@ -87,7 +88,7 @@ class TestYourResourceServer(TestCase):
                 user_id=user_id, product_id=str(i),
                 name="test"+str(i), quantity=float(random.randint(1, 100)),
                 price=round(random.uniform(0.01, 100.00), 2),
-                time=self.random_date(date(2000, 1, 1), date(2022, 10, 1)))
+                time=self._random_date(date(2000, 1, 1), date(2022, 10, 1)))
             products.append(test_product.serialize())
         return products
 
@@ -96,7 +97,8 @@ class TestYourResourceServer(TestCase):
         products = []
         for i in range(count):
             test_product = Products(user_id=user_id, product_id=str(i),
-                                    name="test"+str(i), quantity=1.0, price=1.0, time=date(2011, 1, 1))
+                                    name="test"+str(i), quantity=1.0,
+                                    price=1.0, time=date(2011, 1, 1))
             response = self.app.post(f"/shopcarts/{user_id}/items", json=test_product.serialize())
             self.assertEqual(
                 response.status_code, status.HTTP_201_CREATED, "Could not create test product"
@@ -328,7 +330,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data["quantity"], new_product.quantity)
         self.assertEqual(data["price"], new_product.price)
 
-    def test_update_a_product_400_BAD_REQUEST(self):
+    def test_update_a_product_400_bad_reqest(self):
         """ It should return 400 bad request """
         shopcart = ShopcartsFactory()
         self.app.post("/shopcarts", json=shopcart.serialize())
@@ -393,6 +395,6 @@ class TestYourResourceServer(TestCase):
         response = self.app.post("/shopcarts/1/items", json=product.serialize())
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         product = Products(user_id="1", product_id="2", price=1.0,
-         time=date.today(), quantity=0, name="new")
+                           time=date.today(), quantity=0, name="new")
         response = self.app.post("/shopcarts/1/items", json=product.serialize())
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

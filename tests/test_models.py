@@ -21,7 +21,7 @@ DATABASE_URI = os.getenv(
 
 
 class TestProductsModel(unittest.TestCase):
-    """ Test Cases for Products and Shopcarts Model """
+    """ Test Cases for Products Model """
 
     @classmethod
     def setUpClass(cls):
@@ -284,13 +284,6 @@ class TestProductsModel(unittest.TestCase):
         """It should return 404 not found"""
         self.assertRaises(NotFound, Products.find_or_404, 0)
 
-    def test_create_shopcart(self):
-        """It should create a shopcart"""
-        shopcart = Shopcarts(user_id="1")
-        self.assertEqual(str(shopcart), "<Shopcarts 1>")
-        self.assertTrue(shopcart is not None)
-        self.assertEqual(shopcart.id, None)
-
     def test_find_by_user_id_product(self):
         """It should Find a Product by user_id"""
         products = ProductsFactory.create_batch(5)
@@ -307,6 +300,49 @@ class TestProductsModel(unittest.TestCase):
         self.assertEqual(found[0].price, products[0].price)
         self.assertEqual(found[0].quantity, products[0].quantity)
         self.assertEqual(found[0].time, products[0].time)
+
+
+class TestShopcartsModel(unittest.TestCase):
+    """ Test Cases for Shopcarts Model """
+
+    @classmethod
+    def setUpClass(cls):
+        """ This runs once before the entire test suite """
+        app.config["TESTING"] = True
+        app.config["DEBUG"] = False
+        app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
+        app.logger.setLevel(logging.CRITICAL)
+        Products.init_db(app)
+        Shopcarts.init_db(app)
+
+    @classmethod
+    def tearDownClass(cls):
+        """ This runs once after the entire test suite """
+        db.drop_all()
+        db.create_all()
+        db.session.commit()
+        db.session.close()
+
+    def setUp(self):
+        """ This runs before each test """
+        db.session.query(Products).delete()  # clean up the last tests
+        db.session.query(Shopcarts).delete()  # clean up the last tests
+        db.session.commit()
+
+    def tearDown(self):
+        """ This runs after each test """
+        db.session.remove()
+
+    ######################################################################
+    #  T E S T   C A S E S
+    ######################################################################
+
+    def test_create_shopcart(self):
+        """It should create a shopcart"""
+        shopcart = Shopcarts(user_id="1")
+        self.assertEqual(str(shopcart), "<Shopcarts 1>")
+        self.assertTrue(shopcart is not None)
+        self.assertEqual(shopcart.id, None)
 
     def test_add_shopcart(self):
         """It should create a shopcart and add it to the database"""
