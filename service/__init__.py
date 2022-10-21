@@ -30,6 +30,7 @@ app.logger.info(70 * "*")
 try:
     Products.init_db(app)  # make our SQLAlchemy tables
     Shopcarts.init_db(app)
+# pylint: disable=broad-except
 except Exception as error:
     app.logger.critical("%s: Cannot continue", error)
     # gunicorn requires exit code 4 to stop spawning workers when they die

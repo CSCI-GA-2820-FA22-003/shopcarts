@@ -3,10 +3,10 @@ My Service
 
 Describe what your service does here
 """
-
+# pylint: disable=cyclic-import
 from flask import jsonify, request, url_for, abort
-from .common import status  # HTTP Status Codes
 from service.models import Products, Shopcarts
+from .common import status  # HTTP Status Codes
 # Import Flask application
 from . import app
 
