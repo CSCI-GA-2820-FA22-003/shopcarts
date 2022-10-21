@@ -1,6 +1,7 @@
 """
 CLI Command Extensions for Flask
 """
+import os
 from unittest import TestCase
 from unittest.mock import patch, MagicMock
 from click.testing import CliRunner
@@ -14,9 +15,10 @@ class TestFlaskCLI(TestCase):
         self.runner = CliRunner()
 
     @patch('service.common.cli_commands.db')
-    def test_create_db(self, db_mock):
+    def test_db_create(self, db_mock):
         """It should call the create-db command"""
         db_mock.return_value = MagicMock()
-        result = self.runner.invoke(create_db)
-        self.assertEqual(result.exit_code, 0)
+        with patch.dict(os.environ, {"FLASK_APP": "service:app"}, clear=True):
+            result = self.runner.invoke(create_db)
+            self.assertEqual(result.exit_code, 0)
         
