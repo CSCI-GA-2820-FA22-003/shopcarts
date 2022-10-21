@@ -23,6 +23,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
+      - name: Install libraries for PostgreSQL
+        run: |
+          apt-get update
+          apt-get install -y gcc libpq-dev
             
       - name: Install dependencies
         run: |
@@ -35,7 +40,9 @@ jobs:
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
       - name: Run unit tests with nose
-        run: nosetests
+        run: |
+          export FLASK_APP=service:app
+          nosetests
         env:
           DATABASE_URI: "postgresql://postgres:postgres@postgres:5432/postgres"
 
