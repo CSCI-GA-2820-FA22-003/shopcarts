@@ -1,5 +1,8 @@
 # This is the project for our shopcarts team
 
+[![Build Status](https://github.com/2022-DevOps-Shopcarts/shopcarts/actions/workflows/workflow.yml/badge.svg)](https://github.com/2022-DevOps-Shopcarts/shopcarts/actions)
+[![codecov](https://codecov.io/gh/2022-DevOps-Shopcarts/shopcarts/branch/main/graph/badge.svg?token=7E17S7VS4E)](https://codecov.io/gh/2022-DevOps-Shopcarts/shopcarts)
+
 ## Important: Before you submit a pull request. Make sure
 
 - Run `nosetests` to make sure that all tests are passed and code coverage are no less than 95%
