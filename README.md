@@ -1,5 +1,7 @@
 # This is the project for our shopcarts team
 
+[![Build Status](https://github.com/2022-DevOps-Shopcarts/shopcarts/actions/workflows/workflow.yml/badge.svg)](https://github.com/2022-DevOps-Shopcarts/shopcarts/actions)
+
 ## Important: Before you submit a pull request. Make sure
 
 - Run `nosetests` to make sure that all tests are passed and code coverage are no less than 95%
