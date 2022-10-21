@@ -21,4 +21,3 @@ class TestFlaskCLI(TestCase):
         with patch.dict(os.environ, {"FLASK_APP": "service:app"}, clear=True):
             result = self.runner.invoke(create_db)
             self.assertEqual(result.exit_code, 0)
-        

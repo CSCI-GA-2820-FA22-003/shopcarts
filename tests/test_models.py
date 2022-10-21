@@ -18,6 +18,8 @@ DATABASE_URI = os.getenv(
 ######################################################################
 #  M O D E L   T E S T   C A S E S
 ######################################################################
+
+
 class TestProductsModel(unittest.TestCase):
     """ Test Cases for Products and Shopcarts Model """
 
@@ -56,7 +58,7 @@ class TestProductsModel(unittest.TestCase):
     def test_create_a_product(self):
         """ It should Create a product and assert that it exists """
         product = Products(name="Pen", user_id="1", product_id="2",
-         quantity=1.0, price=12, time=date(2020, 1, 1))
+                           quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertEqual(str(product), "<Products Pen in user 1's shopcart>")
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
@@ -72,7 +74,7 @@ class TestProductsModel(unittest.TestCase):
         products = Products.all()
         self.assertEqual(products, [])
         product = Products(name="Pen", user_id="1", product_id="2",
-         quantity=1.0, price=12, time=date(2020, 1, 1))
+                           quantity=1.0, price=12, time=date(2020, 1, 1))
         shopcart = Shopcarts(user_id="1")
         shopcart.create()
         self.assertTrue(product is not None)
@@ -88,7 +90,7 @@ class TestProductsModel(unittest.TestCase):
         products = Products.all()
         self.assertEqual(products, [])
         product = Products(name="Pen", user_id="1", product_id="2",
-         quantity=1.0, price=12, time=date(2020, 1, 1))
+                           quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
         shopcart = Shopcarts(user_id="1")
@@ -99,7 +101,7 @@ class TestProductsModel(unittest.TestCase):
         products = Products.all()
         self.assertEqual(len(products), 1)
         product = Products(name="Pen", user_id="1", product_id="2",
-         quantity=1.0, price=12, time=date(2020, 1, 1))
+                           quantity=1.0, price=12, time=date(2020, 1, 1))
         self.assertTrue(product is not None)
         self.assertEqual(product.id, None)
         product.create()
@@ -174,23 +176,23 @@ class TestProductsModel(unittest.TestCase):
         self.assertEqual(products, [])
         # Create 5 Pets
         product = Products(name="Pen", user_id="1", product_id="2",
-         quantity=1.0, price=12, time=date(2020, 1, 1))
+                           quantity=1.0, price=12, time=date(2020, 1, 1))
         shopcart = Shopcarts(user_id="1")
         shopcart.create()
         product.create()
         product = Products(name="Pencil", user_id="1", product_id="3",
-         quantity=1.0, price=12, time=date(2020, 1, 1))
+                           quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
         product = Products(name="Pig", user_id="1", product_id="4",
-         quantity=1.0, price=12, time=date(2020, 1, 1))
+                           quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
         product = Products(name="Food", user_id="1", product_id="1",
-         quantity=1.0, price=12, time=date(2020, 1, 1))
+                           quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
         shopcart = Shopcarts(user_id="2")
         shopcart.create()
         product = Products(name="Food", user_id="2", product_id="1",
-         quantity=1.0, price=12, time=date(2020, 1, 1))
+                           quantity=1.0, price=12, time=date(2020, 1, 1))
         product.create()
         # See if we get back 5 products
         products = Products.all()
@@ -246,7 +248,7 @@ class TestProductsModel(unittest.TestCase):
         """It should Find a Product by Name"""
         products = ProductsFactory.create_batch(5)
         for product in products:
-            if len(Shopcarts.find_by_user_id(product.user_id).all())==0:
+            if len(Shopcarts.find_by_user_id(product.user_id).all()) == 0:
                 shopcart = Shopcarts(user_id=product.user_id)
                 shopcart.create()
             product.create()
@@ -263,7 +265,7 @@ class TestProductsModel(unittest.TestCase):
         """It should Find or return 404 not found"""
         products = ProductsFactory.create_batch(3)
         for product in products:
-            if len(Shopcarts.find_by_user_id(product.user_id).all())==0:
+            if len(Shopcarts.find_by_user_id(product.user_id).all()) == 0:
                 shopcart = Shopcarts(user_id=product.user_id)
                 shopcart.create()
             product.create()
@@ -293,7 +295,7 @@ class TestProductsModel(unittest.TestCase):
         """It should Find a Product by user_id"""
         products = ProductsFactory.create_batch(5)
         for product in products:
-            if len(Shopcarts.find_by_user_id(product.user_id).all())==0:
+            if len(Shopcarts.find_by_user_id(product.user_id).all()) == 0:
                 shopcart = Shopcarts(user_id=product.user_id)
                 shopcart.create()
             product.create()
@@ -390,7 +392,7 @@ class TestProductsModel(unittest.TestCase):
         shopcart.id = None
         shopcart.create()
         old_product = Products(user_id=shopcart.user_id, product_id="1", name="Pen",
-         price=1, time=date(2011,1,2), quantity=1)
+                               price=1, time=date(2011, 1, 2), quantity=1)
         old_product.create()
         old_products = []
         old_products.append(old_product)
@@ -399,7 +401,7 @@ class TestProductsModel(unittest.TestCase):
         # Change it an save it
         new_products = []
         new_products.append(Products(user_id=shopcart.user_id, product_id="2", name="Pig",
-         price=1, time=date(2011,1,2), quantity=1))
+                                     price=1, time=date(2011, 1, 2), quantity=1))
         for old_product in shopcart.products:
             old_product.delete()
         original_id = shopcart.id
@@ -425,7 +427,7 @@ class TestProductsModel(unittest.TestCase):
         """It should Find or return 404 not found"""
         shopcarts = ShopcartsFactory.create_batch(3)
         for shopcart in shopcarts:
-            if len(Shopcarts.find_by_user_id(shopcart.user_id).all())==0:
+            if len(Shopcarts.find_by_user_id(shopcart.user_id).all()) == 0:
                 shopcart.create()
                 for product in shopcart.products:
                     product.create()

@@ -24,6 +24,7 @@ class ProductsFactory(factory.Factory):
     price = FuzzyChoice(choices=[1.0, 2.0, 3.0, 4.0])
     time = FuzzyDate(date(2020, 1, 1))
 
+
 class ShopcartsFactory(factory.Factory):
     """Creates fake shopcarts"""
 
