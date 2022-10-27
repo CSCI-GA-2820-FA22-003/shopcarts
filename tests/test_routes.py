@@ -81,7 +81,6 @@ class TestYourResourceServer(TestCase):
             test_product = ProductsFactory()
             test_product.user_id = user_id
             test_product.product_id = str(i)
-            print(test_product.serialize())
             products.append(test_product.serialize())
         return products
 
@@ -92,7 +91,6 @@ class TestYourResourceServer(TestCase):
             test_product = ProductsFactory()
             test_product.user_id = user_id
             test_product.product_id = str(i)
-            print(test_product.serialize())
             response = self.app.post(f"/shopcarts/{user_id}/items", json=test_product.serialize())
             self.assertEqual(
                 response.status_code, status.HTTP_201_CREATED, "Could not create test product"
