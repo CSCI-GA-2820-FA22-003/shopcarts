@@ -20,7 +20,7 @@ class ProductsFactory(factory.Factory):
     name = factory.Faker("first_name")
     user_id = str(FuzzyInteger(1, 999))
     product_id = str(FuzzyInteger(1, 999))
-    quantity = FuzzyInteger(1, 999)
+    quantity = FuzzyFloat(0.01, 99999.0)
     price = FuzzyFloat(0.01, 99999.0)
     time = FuzzyDate(date(2020, 1, 1))
 
