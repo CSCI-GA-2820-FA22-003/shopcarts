@@ -10,12 +10,11 @@ import logging
 from datetime import date
 from unittest import TestCase
 # from unittest.mock import MagicMock, patch
-import datetime
-import random
 from service import app
 from service.models import db, Products, Shopcarts, init_db
 from service.common import status
 from tests.factories import ShopcartsFactory  # HTTP Status Codes
+from tests.factories import ProductsFactory
 
 TEST_USER = "foo"
 DATABASE_URI = os.getenv(
@@ -64,7 +63,8 @@ class TestYourResourceServer(TestCase):
         """Factory method to create shopcarts in bulk"""
         shopcarts = []
         for i in range(count):
-            test_shopcart = Shopcarts(user_id=str(i))
+            test_shopcart = ShopcartsFactory()
+            test_shopcart.user_id = str(i)
             response = self.app.post("/shopcarts", json=test_shopcart.serialize())
             self.assertEqual(
                 response.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
@@ -74,21 +74,13 @@ class TestYourResourceServer(TestCase):
             shopcarts.append(test_shopcart)
         return shopcarts
 
-    def _random_date(self, start_date, end_date):
-        """Generate a random datetime between `start` and `end`"""
-        days_between_dates = (end_date - start_date).days
-        random_number_of_days = random.randrange(days_between_dates)
-        return start_date + datetime.timedelta(days=random_number_of_days)
-
     def _make_products(self, count, user_id):
         """Factory method to create products in bulk under one user_id"""
         products = []
         for i in range(count):
-            test_product = Products(
-                user_id=user_id, product_id=str(i),
-                name="test"+str(i), quantity=float(random.randint(1, 100)),
-                price=round(random.uniform(0.01, 100.00), 2),
-                time=self._random_date(date(2000, 1, 1), date(2022, 10, 1)))
+            test_product = ProductsFactory()
+            test_product.user_id = user_id
+            test_product.product_id = str(i)
             products.append(test_product.serialize())
         return products
 
@@ -96,9 +88,9 @@ class TestYourResourceServer(TestCase):
         """Factory method to create products in bulk under one user_id"""
         products = []
         for i in range(count):
-            test_product = Products(user_id=user_id, product_id=str(i),
-                                    name="test"+str(i), quantity=1.0,
-                                    price=1.0, time=date(2011, 1, 1))
+            test_product = ProductsFactory()
+            test_product.user_id = user_id
+            test_product.product_id = str(i)
             response = self.app.post(f"/shopcarts/{user_id}/items", json=test_product.serialize())
             self.assertEqual(
                 response.status_code, status.HTTP_201_CREATED, "Could not create test product"
