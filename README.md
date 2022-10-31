@@ -36,21 +36,21 @@ Shopcarts schema
 
 **List of REST API endpoints**
 ----
-```
-POST   /shopcarts		 <- Create a shopcart
-GET    /shopcarts	     <- List all shopcarts
-GET    /shopcarts/{id}	 <- Read a shopcart 
-PUT    /shopcarts/{id}	 <- Update a shopcart
-DELETE /shopcarts/{id}	 <- Delete a shopcart
 
-POST   /shopcarts/{id}/items	   <- Add an item to a shopcart
-GET    /shopcarts/{id}/items	   <- List all items in a shopcart
-GET    /shopcarts/{id}/items/{id}  <- Read an item from a shopcart
-PUT    /shopcarts/{id}/items/{id}  <- Update an item in a shopcart
-DELETE /shopcarts/{id}/items/{id}  <- Delete an item from a shopcart
-```
+POST   /shopcarts		 <- [Create a shopcart](#create-a-shopcart)\
+GET    /shopcarts	     <- [List all shopcarts](#read-all-shopcarts)\
+GET    /shopcarts/{id}	 <- [Read a shopcart](#read-a-shopcart)\
+PUT    /shopcarts/{id}	 <- [Update a shopcart](#update-a-shopcart)\
+DELETE /shopcarts/{id}	 <- [Delete a shopcart](#delete-a-shopcart)
 
-**Create a shopcart**
+POST   /shopcarts/{id}/items	   <- [Add an item to a shopcart](#create-a-product)\
+GET    /shopcarts/{id}/items	   <- [List all items in a shopcart](#read-all-product)\
+GET    /shopcarts/{id}/items/{id}  <- [Read an item from a shopcart](#read-a-product)\
+PUT    /shopcarts/{id}/items/{id}  <- [Update an item in a shopcart](#update-a-product)\
+DELETE /shopcarts/{id}/items/{id}  <- [Delete an item from a shopcart](#delete-a-product)
+
+
+## Create a shopcart
 ----
   Create a shopcart by user_id
 
@@ -93,7 +93,7 @@ Content-Type: application/json
     ```
 
 
-**Update a shopcart**
+## Update a shopcart
 ----
   Update a shopcart by user_id and shopcart list
 
@@ -150,7 +150,7 @@ Content-Type: application/json
     }
     ```
 
-**Read a shopcart**
+## Read a shopcart
 ----
   Read a shopcart by user_id
 
@@ -197,7 +197,7 @@ NULL
     }
     ```
 
-**Read all shopcarts**
+## Read all shopcarts
 ----
   Read all shopcarts in table
 
@@ -236,7 +236,7 @@ NULL
 * **Error Response:**
 NULL
 
-**Delete a shopcart**
+## Delete a shopcart
 ----
   Delete a shopcart by user_id
 
@@ -259,7 +259,7 @@ NULL
 NULL
 
 
-**Create a product**
+## Create a product
 ----
   Create a product by used_id and product detail
 
@@ -302,7 +302,7 @@ Content-Type: application/json
 NULL
 
 
-**Read a product**
+## Read a product
 ----
   Read a shopcart by user_id and product_id
 
@@ -343,7 +343,7 @@ NULL
     }
     ```
 
-**Read all product**
+## Read all product
 ----
   Read all product in table
 
@@ -395,7 +395,7 @@ NULL
     ```
 
 
-**Update a product**
+## Update a product
 ----
   Update a product by user_id and product_id and product detail
 
@@ -447,7 +447,7 @@ Content-Type: application/json
     ```
 
 
-**Delete a product**
+## Delete a product
 ----
   Delete a product by user_id and product_id
 
