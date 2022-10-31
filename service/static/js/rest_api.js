@@ -6,25 +6,25 @@ $(function () {
 
     // Updates the form with data from the response
     function update_form_data(res) {
-        $("#pet_id").val(res.id);
-        $("#pet_name").val(res.name);
-        $("#pet_category").val(res.category);
+        $("#shopcart_id").val(res.id);
+        $("#product_name").val(res.name);
+        $("#user_id").val(res.UserID);
         if (res.available == true) {
             $("#pet_available").val("true");
         } else {
             $("#pet_available").val("false");
         }
         $("#pet_gender").val(res.gender);
-        $("#pet_birthday").val(res.birthday);
+        $("#record_time").val(res.recordTime);
     }
 
     /// Clears all form fields
     function clear_form_data() {
-        $("#pet_name").val("");
-        $("#pet_category").val("");
+        $("#product_name").val("");
+        $("#user_id").val("");
         $("#pet_available").val("");
         $("#pet_gender").val("");
-        $("#pet_birthday").val("");
+        $("#record_time").val("");
     }
 
     // Updates the flash message area
@@ -34,30 +34,37 @@ $(function () {
     }
 
     // ****************************************
-    // Create a Pet
+    // Create a Record
     // ****************************************
 
     $("#create-btn").click(function () {
 
-        let name = $("#pet_name").val();
-        let category = $("#pet_category").val();
-        let available = $("#pet_available").val() == "true";
-        let gender = $("#pet_gender").val();
-        let birthday = $("#pet_birthday").val();
+        let name = $("#product_name").val();
+        let UserID = $("#user_id").val();
+        let productID = $("#product_id").val();
+        let quantity = $("#quantity").val();
+        let price = $("#price").val();
+
+
+        // let available = $("#pet_available").val() == "true";
+        // let gender = $("#pet_gender").val();
+        let recordTime = $("#record_time").val();
 
         let data = {
+            
+            "user_id": UserID,
+            "product_id": productID,
             "name": name,
-            "category": category,
-            "available": available,
-            "gender": gender,
-            "birthday": birthday
+            "quantity": parseFloat(quantity),
+            "price": parseFloat(price),
+            "time": recordTime
         };
 
         $("#flash_message").empty();
         
         let ajax = $.ajax({
             type: "POST",
-            url: "/pets",
+            url: "/shopcarts/"+UserID+"/items",
             contentType: "application/json",
             data: JSON.stringify(data),
         });
@@ -79,26 +86,26 @@ $(function () {
 
     $("#update-btn").click(function () {
 
-        let pet_id = $("#pet_id").val();
-        let name = $("#pet_name").val();
-        let category = $("#pet_category").val();
+        let shopcart_id = $("#shopcart_id").val();
+        let name = $("#product_name").val();
+        let UserID = $("#user_id").val();
         let available = $("#pet_available").val() == "true";
         let gender = $("#pet_gender").val();
-        let birthday = $("#pet_birthday").val();
+        let recordTime = $("#record_time").val();
 
         let data = {
             "name": name,
-            "category": category,
+            "UserID": UserID,
             "available": available,
             "gender": gender,
-            "birthday": birthday
+            "recordTime": recordTime
         };
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
                 type: "PUT",
-                url: `/pets/${pet_id}`,
+                url: `/shopcarts/${shopcart_id}`,
                 contentType: "application/json",
                 data: JSON.stringify(data)
             })
@@ -120,13 +127,13 @@ $(function () {
 
     $("#retrieve-btn").click(function () {
 
-        let pet_id = $("#pet_id").val();
+        let shopcart_id = $("#shopcart_id").val();
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/pets/${pet_id}`,
+            url: `/shopcarts/${shopcart_id}`,
             contentType: "application/json",
             data: ''
         })
@@ -150,13 +157,13 @@ $(function () {
 
     $("#delete-btn").click(function () {
 
-        let pet_id = $("#pet_id").val();
+        let shopcart_id = $("#shopcart_id").val();
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/pets/${pet_id}`,
+            url: `/shopcarts/${shopcart_id}`,
             contentType: "application/json",
             data: '',
         })
@@ -176,7 +183,7 @@ $(function () {
     // ****************************************
 
     $("#clear-btn").click(function () {
-        $("#pet_id").val("");
+        $("#shopcart_id").val("");
         $("#flash_message").empty();
         clear_form_data()
     });
@@ -187,8 +194,8 @@ $(function () {
 
     $("#search-btn").click(function () {
 
-        let name = $("#pet_name").val();
-        let category = $("#pet_category").val();
+        let name = $("#product_name").val();
+        let UserID = $("#user_id").val();
         let available = $("#pet_available").val() == "true";
 
         let queryString = ""
@@ -196,11 +203,11 @@ $(function () {
         if (name) {
             queryString += 'name=' + name
         }
-        if (category) {
+        if (UserID) {
             if (queryString.length > 0) {
-                queryString += '&category=' + category
+                queryString += '&UserID=' + UserID
             } else {
-                queryString += 'category=' + category
+                queryString += 'UserID=' + UserID
             }
         }
         if (available) {
@@ -227,15 +234,15 @@ $(function () {
             table += '<thead><tr>'
             table += '<th class="col-md-2">ID</th>'
             table += '<th class="col-md-2">Name</th>'
-            table += '<th class="col-md-2">Category</th>'
+            table += '<th class="col-md-2">UserID</th>'
             table += '<th class="col-md-2">Available</th>'
             table += '<th class="col-md-2">Gender</th>'
-            table += '<th class="col-md-2">Birthday</th>'
+            table += '<th class="col-md-2">recordTime</th>'
             table += '</tr></thead><tbody>'
             let firstPet = "";
             for(let i = 0; i < res.length; i++) {
                 let pet = res[i];
-                table +=  `<tr id="row_${i}"><td>${pet.id}</td><td>${pet.name}</td><td>${pet.category}</td><td>${pet.available}</td><td>${pet.gender}</td><td>${pet.birthday}</td></tr>`;
+                table +=  `<tr id="row_${i}"><td>${pet.id}</td><td>${pet.name}</td><td>${pet.UserID}</td><td>${pet.available}</td><td>${pet.gender}</td><td>${pet.recordTime}</td></tr>`;
                 if (i == 0) {
                     firstPet = pet;
                 }
