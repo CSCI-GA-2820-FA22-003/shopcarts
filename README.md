@@ -253,7 +253,7 @@ NULL
 
   * **Code:** HTTP_204_NO_CONTENT <br />
     **Content:** 
-    NO_CONTENT
+    ""
 
 * **Error Response:**
 NULL
