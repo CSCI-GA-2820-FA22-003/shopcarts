@@ -31,6 +31,7 @@
                 <input type="text" class="form-control" id="user_id" placeholder="Enter ID of User">
               </div>
               <div class="col-sm-4">
+                <button type="submit" class="btn btn-primary" id="new-cart-btn">Create Shopcart</button>
                 <button type="submit" class="btn btn-primary" id="retrieve-btn">Retrieve</button>
                 <button type="submit" class="btn btn-danger" id="delete-btn">Delete</button>
               </div>
@@ -55,11 +56,11 @@
               </div>
             </div>
 
-            <!-- AVAILABLE -->
+            <!-- price -->
             <!-- <div class="form-group">
-              <label class="control-label col-sm-2" for="pet_available">Available:</label>
+              <label class="control-label col-sm-2" for="price">price:</label>
               <div class="col-sm-10">
-                <select class="form-control" id="pet_available">
+                <select class="form-control" id="price">
                   <option value="true" selected>True</option>
                   <option value="false">False</option>
                 </select>
@@ -83,11 +84,11 @@
             </div>
 
 
-            <!-- GENDER -->
+            <!-- quantity -->
             <!-- <div class="form-group">
-              <label class="control-label col-sm-2" for="pet_gender">Gender:</label>
+              <label class="control-label col-sm-2" for="quantity">quantity:</label>
               <div class="col-sm-10">
-                <select class="form-control" id="pet_gender">
+                <select class="form-control" id="quantity">
                   <option value="UNKNOWN" selected>Unknown</option>
                   <option value="MALE">Male</option>
                   <option value="FEMALE">Female</option>
@@ -125,8 +126,8 @@
             <th class="col-md-1">ID</th>
             <th class="col-md-4">Name</th>
             <th class="col-md-4">UserID</th>
-            <th class="col-md-3">Available</th>
-            <th class="col-md-3">Gender</th>
+            <th class="col-md-3">price</th>
+            <th class="col-md-3">quantity</th>
             <th class="col-md-3">recordTime</th>
           </tr>
           </thead>

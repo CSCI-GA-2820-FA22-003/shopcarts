@@ -6,24 +6,22 @@ $(function () {
 
     // Updates the form with data from the response
     function update_form_data(res) {
-        $("#shopcart_id").val(res.id);
+        
+        $("#product_id").val(res.id);
         $("#product_name").val(res.name);
-        $("#user_id").val(res.UserID);
-        if (res.available == true) {
-            $("#pet_available").val("true");
-        } else {
-            $("#pet_available").val("false");
-        }
-        $("#pet_gender").val(res.gender);
-        $("#record_time").val(res.recordTime);
+        $("#user_id").val(res.user_id);
+        $("#quantity").val(res.quantity);
+        $("#price").val(res.price);
+        $("#record_time").val(res.time);
     }
 
     /// Clears all form fields
     function clear_form_data() {
         $("#product_name").val("");
         $("#user_id").val("");
-        $("#pet_available").val("");
-        $("#pet_gender").val("");
+        $("#product_id").val("");
+        $("#quantity").val("");
+        $("#price").val("");
         $("#record_time").val("");
     }
 
@@ -46,8 +44,8 @@ $(function () {
         let price = $("#price").val();
 
 
-        // let available = $("#pet_available").val() == "true";
-        // let gender = $("#pet_gender").val();
+        // let price = $("#price").val() == "true";
+        // let quantity = $("#quantity").val();
         let recordTime = $("#record_time").val();
 
         let data = {
@@ -81,23 +79,23 @@ $(function () {
 
 
     // ****************************************
-    // Update a Pet
+    // Update a Record
     // ****************************************
 
     $("#update-btn").click(function () {
 
-        let shopcart_id = $("#shopcart_id").val();
+        let user_id = $("#user_id").val();
         let name = $("#product_name").val();
         let UserID = $("#user_id").val();
-        let available = $("#pet_available").val() == "true";
-        let gender = $("#pet_gender").val();
+        let price = $("#price").val() == "true";
+        let quantity = $("#quantity").val();
         let recordTime = $("#record_time").val();
 
         let data = {
             "name": name,
             "UserID": UserID,
-            "available": available,
-            "gender": gender,
+            "price": price,
+            "quantity": quantity,
             "recordTime": recordTime
         };
 
@@ -105,7 +103,7 @@ $(function () {
 
         let ajax = $.ajax({
                 type: "PUT",
-                url: `/shopcarts/${shopcart_id}`,
+                url: `/shopcarts/${user_id}`,
                 contentType: "application/json",
                 data: JSON.stringify(data)
             })
@@ -122,18 +120,52 @@ $(function () {
     });
 
     // ****************************************
+    // Create a new shopcart
+    // ****************************************
+
+    $("#new-cart-btn").click(function () {
+
+        let user_id = $("#user_id").val();
+
+        let data = {
+            "user_id": user_id,
+        };
+
+        $("#flash_message").empty();
+
+        let ajax = $.ajax({
+            type: "POST",
+            url: `/shopcarts`,
+            contentType: "application/json",
+            data: JSON.stringify(data)
+        })
+
+        ajax.done(function(res){
+            //alert(res.toSource())
+            update_form_data(res)
+            flash_message("Success")
+        });
+
+        ajax.fail(function(res){
+            clear_form_data()
+            flash_message(res.responseJSON.message)
+        });
+
+    });
+
+    // ****************************************
     // Retrieve a Pet
     // ****************************************
 
     $("#retrieve-btn").click(function () {
 
-        let shopcart_id = $("#shopcart_id").val();
+        let user_id = $("#user_id").val();
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/shopcarts/${shopcart_id}`,
+            url: `/shopcarts/${user_id}`,
             contentType: "application/json",
             data: ''
         })
@@ -152,25 +184,25 @@ $(function () {
     });
 
     // ****************************************
-    // Delete a Pet
+    // Delete a Shopcart
     // ****************************************
 
     $("#delete-btn").click(function () {
 
-        let shopcart_id = $("#shopcart_id").val();
+        let user_id = $("#user_id").val();
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/shopcarts/${shopcart_id}`,
+            url: `/shopcarts/${user_id}`,
             contentType: "application/json",
             data: '',
         })
 
         ajax.done(function(res){
             clear_form_data()
-            flash_message("Pet has been Deleted!")
+            flash_message("Shopcart has been Deleted!")
         });
 
         ajax.fail(function(res){
@@ -183,7 +215,7 @@ $(function () {
     // ****************************************
 
     $("#clear-btn").click(function () {
-        $("#shopcart_id").val("");
+        $("#user_id").val("");
         $("#flash_message").empty();
         clear_form_data()
     });
@@ -196,7 +228,7 @@ $(function () {
 
         let name = $("#product_name").val();
         let UserID = $("#user_id").val();
-        let available = $("#pet_available").val() == "true";
+        let price = $("#price").val() == "true";
 
         let queryString = ""
 
@@ -210,11 +242,11 @@ $(function () {
                 queryString += 'UserID=' + UserID
             }
         }
-        if (available) {
+        if (price) {
             if (queryString.length > 0) {
-                queryString += '&available=' + available
+                queryString += '&price=' + price
             } else {
-                queryString += 'available=' + available
+                queryString += 'price=' + price
             }
         }
 
@@ -235,14 +267,14 @@ $(function () {
             table += '<th class="col-md-2">ID</th>'
             table += '<th class="col-md-2">Name</th>'
             table += '<th class="col-md-2">UserID</th>'
-            table += '<th class="col-md-2">Available</th>'
-            table += '<th class="col-md-2">Gender</th>'
+            table += '<th class="col-md-2">price</th>'
+            table += '<th class="col-md-2">quantity</th>'
             table += '<th class="col-md-2">recordTime</th>'
             table += '</tr></thead><tbody>'
             let firstPet = "";
             for(let i = 0; i < res.length; i++) {
                 let pet = res[i];
-                table +=  `<tr id="row_${i}"><td>${pet.id}</td><td>${pet.name}</td><td>${pet.UserID}</td><td>${pet.available}</td><td>${pet.gender}</td><td>${pet.recordTime}</td></tr>`;
+                table +=  `<tr id="row_${i}"><td>${pet.id}</td><td>${pet.name}</td><td>${pet.UserID}</td><td>${pet.price}</td><td>${pet.quantity}</td><td>${pet.recordTime}</td></tr>`;
                 if (i == 0) {
                     firstPet = pet;
                 }
