@@ -7,7 +7,7 @@ $(function () {
     // Updates the form with data from the response
     function update_form_data(res) {
         
-        $("#product_id").val(res.id);
+        $("#product_id").val(res.product_id);
         $("#product_name").val(res.name);
         $("#user_id").val(res.user_id);
         $("#quantity").val(res.quantity);
@@ -32,7 +32,7 @@ $(function () {
     }
 
     // ****************************************
-    // Create a Record
+    // Create a Record / Add an item to a shopcart
     // ****************************************
 
     $("#create-btn").click(function () {
@@ -67,7 +67,7 @@ $(function () {
     
             ajax.done(function(res){
                 update_form_data(res)
-                flash_message("Success")
+                flash_message("Record has been created")
             });
     
             ajax.fail(function(res){
@@ -79,7 +79,7 @@ $(function () {
 
 
     // ****************************************
-    // Update a Record
+    // Update a Record / Update an item in a shopcart
     // ****************************************
 
     $("#update-btn").click(function () {
@@ -144,7 +144,7 @@ $(function () {
         ajax.done(function(res){
             //alert(res.toSource())
             update_form_data(res)
-            flash_message("Success")
+            flash_message("Create shopcart successfully")
         });
 
         ajax.fail(function(res){
@@ -155,7 +155,7 @@ $(function () {
     });
 
     // ****************************************
-    // Retrieve a Record
+    // Retrieve a Record / Read an item from a shopcart
     // ****************************************
 
     $("#retrieve-btn").click(function () {
@@ -164,29 +164,62 @@ $(function () {
         let product_id = $("#product_id").val();
 
         $("#flash_message").empty();
-
-        let ajax = $.ajax({
-            type: "GET",
-            url: `/shopcarts/${user_id}/items/${product_id}`,
-            contentType: "application/json",
-            data: ''
-        })
-
-        ajax.done(function(res){
-            //alert(res.toSource())
-            update_form_data(res)
-            flash_message("Success")
-        });
-
-        ajax.fail(function(res){
-            clear_form_data()
-            flash_message(res.responseJSON.message)
-        });
-
+        if(!user_id||!product_id){
+            flash_message("Please fill userID and productID")
+        }else{
+            let ajax = $.ajax({
+                type: "GET",
+                url: `/shopcarts/${user_id}/items/${product_id}`,
+                contentType: "application/json",
+                data: ''
+            })
+    
+            ajax.done(function(res){
+                //alert(res.toSource())
+                update_form_data(res)
+                flash_message("Success")
+            });
+    
+            ajax.fail(function(res){
+                clear_form_data()
+                flash_message(res.responseJSON.message)
+            });
+        }
     });
 
     // ****************************************
-    // Delete a Shopcart
+    //  Delete an item from a shopcart
+    // ****************************************
+
+    $("#delete-item-btn").click(function () {
+
+        let user_id = $("#user_id").val();
+        let product_id = $("#product_id").val();
+
+        $("#flash_message").empty();
+        if(!user_id||!product_id){
+            flash_message("Please fill userID and productID")
+        }else{
+            let ajax = $.ajax({
+                type: "DELETE",
+                url: `/shopcarts/${user_id}/items/${product_id}`,
+                contentType: "application/json",
+                data: '',
+            })
+
+            ajax.done(function(res){
+                clear_form_data()
+                flash_message("Item has been Deleted!")
+            });
+
+            ajax.fail(function(res){
+                flash_message("Server error!")
+            });
+        }
+    });
+
+    // ****************************************
+    //  Delete a shopcart
     // ****************************************
 
     $("#delete-btn").click(function () {
@@ -223,40 +256,18 @@ $(function () {
     });
 
     // ****************************************
-    // Get all
+    // Read all products in a shopcart
     // ****************************************
 
-    $("#search-btn").click(function () {
+    $("#read-all-btn").click(function () {
 
-        let name = $("#product_name").val();
-        let UserID = $("#user_id").val();
-        let price = $("#price").val() == "true";
-
-        let queryString = ""
-
-        if (name) {
-            queryString += 'name=' + name
-        }
-        if (UserID) {
-            if (queryString.length > 0) {
-                queryString += '&UserID=' + UserID
-            } else {
-                queryString += 'UserID=' + UserID
-            }
-        }
-        if (price) {
-            if (queryString.length > 0) {
-                queryString += '&price=' + price
-            } else {
-                queryString += 'price=' + price
-            }
-        }
+        let user_id = $("#user_id").val();
 
         $("#flash_message").empty();
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/pets?${queryString}`,
+            url: `/shopcarts/${user_id}/items`,
             contentType: "application/json",
             data: ''
         })
@@ -264,108 +275,31 @@ $(function () {
         ajax.done(function(res){
             //alert(res.toSource())
             $("#search_results").empty();
-            let table = '<table class="table table-striped" cellpadding="10">'
-            table += '<thead><tr>'
-            table += '<th class="col-md-2">ID</th>'
-            table += '<th class="col-md-2">Name</th>'
-            table += '<th class="col-md-2">UserID</th>'
-            table += '<th class="col-md-2">price</th>'
-            table += '<th class="col-md-2">quantity</th>'
-            table += '<th class="col-md-2">recordTime</th>'
-            table += '</tr></thead><tbody>'
-            let firstPet = "";
-            for(let i = 0; i < res.length; i++) {
-                let pet = res[i];
-                table +=  `<tr id="row_${i}"><td>${pet.id}</td><td>${pet.name}</td><td>${pet.UserID}</td><td>${pet.price}</td><td>${pet.quantity}</td><td>${pet.recordTime}</td></tr>`;
-                if (i == 0) {
-                    firstPet = pet;
+            if(res.length==0){
+                flash_message("No items in current shopcart")
+            }else{
+                let table = '<table class="table table-striped" cellpadding="10">'
+                table += '<thead><tr>'
+                table += '<th class="col-md-2">ID</th>'
+                table += '<th class="col-md-2">Name</th>'
+                table += '<th class="col-md-2">UserID</th>'
+                table += '<th class="col-md-2">price</th>'
+                table += '<th class="col-md-2">quantity</th>'
+                table += '<th class="col-md-2">recordTime</th>'
+                table += '</tr></thead><tbody>'
+                let firstProduct = "";
+                for(let i = 0; i < res.length; i++) {
+                    let product = res[i];
+                    table +=  `<tr id="row_${i}"><td>${product.id}</td><td>${product.name}</td><td>${product.user_id}</td><td>${product.price}</td><td>${product.quantity}</td><td>${product.time}</td></tr>`;
+                    if (i == 0) {
+                        firstProduct = product;
+                    }
                 }
+                table += '</tbody></table>';
+                $("#search_results").append(table);
+                
+                flash_message("Success")
             }
-            table += '</tbody></table>';
-            $("#search_results").append(table);
-
-            // copy the first result to the form
-            if (firstPet != "") {
-                update_form_data(firstPet)
-            }
-
-            flash_message("Success")
-        });
-
-        ajax.fail(function(res){
-            flash_message(res.responseJSON.message)
-        });
-
-    });
-
-    // ****************************************
-    // Search for a Pet
-    // ****************************************
-
-    $("#search-btn").click(function () {
-
-        let name = $("#product_name").val();
-        let UserID = $("#user_id").val();
-        let price = $("#price").val() == "true";
-
-        let queryString = ""
-
-        if (name) {
-            queryString += 'name=' + name
-        }
-        if (UserID) {
-            if (queryString.length > 0) {
-                queryString += '&UserID=' + UserID
-            } else {
-                queryString += 'UserID=' + UserID
-            }
-        }
-        if (price) {
-            if (queryString.length > 0) {
-                queryString += '&price=' + price
-            } else {
-                queryString += 'price=' + price
-            }
-        }
-
-        $("#flash_message").empty();
-
-        let ajax = $.ajax({
-            type: "GET",
-            url: `/pets?${queryString}`,
-            contentType: "application/json",
-            data: ''
-        })
-
-        ajax.done(function(res){
-            //alert(res.toSource())
-            $("#search_results").empty();
-            let table = '<table class="table table-striped" cellpadding="10">'
-            table += '<thead><tr>'
-            table += '<th class="col-md-2">ID</th>'
-            table += '<th class="col-md-2">Name</th>'
-            table += '<th class="col-md-2">UserID</th>'
-            table += '<th class="col-md-2">price</th>'
-            table += '<th class="col-md-2">quantity</th>'
-            table += '<th class="col-md-2">recordTime</th>'
-            table += '</tr></thead><tbody>'
-            let firstPet = "";
-            for(let i = 0; i < res.length; i++) {
-                let pet = res[i];
-                table +=  `<tr id="row_${i}"><td>${pet.id}</td><td>${pet.name}</td><td>${pet.UserID}</td><td>${pet.price}</td><td>${pet.quantity}</td><td>${pet.recordTime}</td></tr>`;
-                if (i == 0) {
-                    firstPet = pet;
-                }
-            }
-            table += '</tbody></table>';
-            $("#search_results").append(table);
-
-            // copy the first result to the form
-            if (firstPet != "") {
-                update_form_data(firstPet)
-            }
-
-            flash_message("Success")
         });
 
         ajax.fail(function(res){

@@ -31,14 +31,26 @@
                 <input type="text" class="form-control" id="user_id" placeholder="Enter ID of User">
               </div>
               <div class="col-sm-4">
-                <button type="submit" class="btn btn-primary" id="new-cart-btn">Create Shopcart</button>
-                <button type="submit" class="btn btn-primary" id="retrieve-btn">Retrieve</button>
+                <button type="submit" class="btn btn-success" id="new-cart-btn">Create Shopcart</button>
+                <button type="submit" class="btn btn-primary" id="read-all-btn">Read this</button>
                 <button type="submit" class="btn btn-danger" id="delete-btn">Delete</button>
               </div>
             </div>
           </div> <!-- form horizontal -->
 
           <div class="form-horizontal">
+
+            <!-- Product Id -->
+            <div class="form-group">
+              <label class="control-label col-sm-2" for="product_id">Product ID:</label>
+              <div class="col-sm-10">
+                <input type="text" class="form-control" id="product_id" placeholder="Enter UserID for Product">
+              </div>
+              <div class="col-sm-4">
+                <button type="submit" class="btn btn-primary" id="retrieve-btn">Retrieve record</button>
+                <button type="submit" class="btn btn-danger" id="delete-item-btn">Delete record</button>
+              </div>
+            </div>
 
             <!-- NAME -->
             <div class="form-group">
@@ -47,25 +59,6 @@
                 <input type="text" class="form-control" id="product_name" placeholder="Enter name for Pet">
               </div>
             </div>
-
-            <!-- UserID -->
-            <div class="form-group">
-              <label class="control-label col-sm-2" for="product_id">Product ID:</label>
-              <div class="col-sm-10">
-                <input type="text" class="form-control" id="product_id" placeholder="Enter UserID for Product">
-              </div>
-            </div>
-
-            <!-- price -->
-            <!-- <div class="form-group">
-              <label class="control-label col-sm-2" for="price">price:</label>
-              <div class="col-sm-10">
-                <select class="form-control" id="price">
-                  <option value="true" selected>True</option>
-                  <option value="false">False</option>
-                </select>
-              </div>
-            </div> -->
 
             <!-- Quantity -->
             <div class="form-group">
@@ -83,19 +76,6 @@
               </div>
             </div>
 
-
-            <!-- quantity -->
-            <!-- <div class="form-group">
-              <label class="control-label col-sm-2" for="quantity">quantity:</label>
-              <div class="col-sm-10">
-                <select class="form-control" id="quantity">
-                  <option value="UNKNOWN" selected>Unknown</option>
-                  <option value="MALE">Male</option>
-                  <option value="FEMALE">Female</option>
-                </select>
-              </div>
-            </div> -->
-
             <!-- recordTime -->
             <div class="form-group">
               <label class="control-label col-sm-2" for="record_time">recordTime:</label>
@@ -104,11 +84,10 @@
               </div>
             </div>
 
-
             <!-- SUBMIT BUTTONS -->
             <div class="form-group">
               <div class="col-sm-offset-2 col-sm-10">
-                <button type="submit" class="btn btn-primary" id="search-btn">Search</button>
+                <!-- <button type="submit" class="btn btn-primary" id="search-btn">Search</button> -->
                 <button type="submit" class="btn btn-primary" id="clear-btn">Clear</button>
                 <button type="submit" class="btn btn-success" id="create-btn">Create</button>
                 <button type="submit" class="btn btn-warning" id="update-btn">Update</button>
