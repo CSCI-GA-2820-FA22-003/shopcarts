@@ -13,6 +13,8 @@
 
 ## Run `flask run` to start the service. If you want to clean the database, run `flask create-db`.
 
+## Run `honcho start` to start the User Interface service.
+
 Product table schema
 ```
 {
