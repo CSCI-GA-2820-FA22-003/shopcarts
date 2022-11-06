@@ -13,6 +13,8 @@
 
 ## Run `flask run` to start the service. If you want to clean the database, run `flask create-db`.
 
+## Run `honcho start` to start the User Interface service.
+
 Product table schema
 ```
 {
@@ -345,7 +347,7 @@ NULL
 
 ## Read all product
 ----
-  Read all product in table
+  Read all products in a shopcart
 
 * **URL**
 
@@ -401,7 +403,7 @@ NULL
 
 * **URL**
 
-  PUT /shopcarts/<user_id>
+  PUT /shopcarts/<user_id>/items/<product_id>
 
 * **Request Headers:**
 Content-Type: application/json

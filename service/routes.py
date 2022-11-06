@@ -17,10 +17,7 @@ from . import app
 @app.route("/")
 def index():
     """ Root URL response """
-    return (
-        "Welcome to the Shopcarts service",
-        status.HTTP_200_OK,
-    )
+    return app.send_static_file("index.html")
 
 #######################################################################
 # REST API
