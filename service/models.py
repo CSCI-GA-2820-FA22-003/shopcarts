@@ -227,6 +227,13 @@ class Products(db.Model):
                 "Invalid Products: body of request contained bad or no data - "
                 "Error message: " + str(error)
             ) from error
+
+        if self.price < 0:
+            raise DataValidationError("Price should not be negative")
+
+        if self.quantity <= 0:
+            raise DataValidationError("Quantity should be positive")
+
         return self
 
     @classmethod
