@@ -11,6 +11,15 @@ from .common import status  # HTTP Status Codes
 from . import app
 
 
+############################################################
+# Health Endpoint
+############################################################
+@app.route("/health")
+def health():
+    """Health Status"""
+    return jsonify(dict(status="OK")), status.HTTP_200_OK
+
+
 ######################################################################
 # GET INDEX
 ######################################################################
@@ -18,6 +27,7 @@ from . import app
 def index():
     """ Root URL response """
     return app.send_static_file("index.html")
+
 
 #######################################################################
 # REST API

@@ -24,7 +24,8 @@ RUN apt-get install -y gcc libpq-dev
 
 # Set up the Python development environment
 WORKDIR /app
-RUN python -m pip install --upgrade pip wheel
+RUN python -m pip install --upgrade pip && \
+    pip install --upgrade wheel
 
 EXPOSE 8000
 
@@ -33,3 +34,7 @@ ENV TERM=xterm-256color
 
 # Become a regular user
 USER $USERNAME
+
+# Install user mode tools
+COPY .devcontainer/scripts/install-tools.sh /tmp/
+RUN cd /tmp; bash ./install-tools.sh

@@ -1,3 +1,13 @@
+# These can be overidden with env vars.
+REGISTRY ?= us.icr.io
+NAMESPACE ?= nyu_devops
+IMAGE_NAME ?= shopcarts
+IMAGE_TAG ?= 1.0
+IMAGE ?= $(REGISTRY)/$(NAMESPACE)/$(IMAGE_NAME):$(IMAGE_TAG)
+# PLATFORM ?= "linux/amd64,linux/arm64"
+PLATFORM ?= "linux/amd64"
+CLUSTER ?= nyu-devops
+
 .PHONY: all help install venv test run
 
 help: ## Display this help
@@ -26,3 +36,37 @@ test: ## Run the unit tests
 run: ## Run the service
 	$(info Starting service...)
 	honcho start
+
+login: ## Login to IBM Cloud using yur api key
+	$(info Logging into IBM Cloud cluster $(CLUSTER)...)
+	ibmcloud login -a cloud.ibm.com -g Default -r us-south --apikey @~/apikey.json
+	ibmcloud cr login
+	ibmcloud ks cluster config --cluster $(CLUSTER)
+	kubectl cluster-info
+
+.PHONY: push
+image-push: ## Push to a Docker image registry
+	$(info Logging into IBM Cloud cluster $(CLUSTER)...)
+	docker push $(IMAGE)
+
+############################################################
+# COMMANDS FOR BUILDING THE IMAGE
+############################################################
+
+.PHONY: init
+init: export DOCKER_BUILDKIT=1
+init:	## Creates the buildx instance
+	$(info Initializing Builder...)
+	docker buildx create --use --name=qemu
+	docker buildx inspect --bootstrap
+
+.PHONY: build
+build:	## Build all of the project Docker images
+	$(info Building $(IMAGE) for $(PLATFORM)...)
+	docker buildx build --file Dockerfile  --pull --platform=$(PLATFORM) --tag $(IMAGE) --load .
+
+.PHONY: remove
+remove:	## Stop and remove the buildx builder
+	$(info Stopping and removing the builder image...)
+	docker buildx stop
+	docker buildx rm
