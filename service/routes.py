@@ -187,10 +187,6 @@ def add_a_product(user_id):
     product = Products()
     check_content_type("application/json")
     product.deserialize(request.get_json())
-    if product.price < 0:
-        abort(status.HTTP_400_BAD_REQUEST, "Price should not be negative")
-    elif product.quantity <= 0:
-        abort(status.HTTP_400_BAD_REQUEST, "Quantity should be positive")
     product.create()
     app.logger.info(f"Product {product.product_id} created in shopcart {user_id}")
 
