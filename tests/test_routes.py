@@ -379,14 +379,3 @@ class TestYourResourceServer(TestCase):
         """It should not alloww unsupported methods"""
         response = self.app.put("/shopcarts")
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def test_create_product_wrong_data(self):
-        """It should not Create a Shopcart with missing data"""
-        product = Products(user_id="1", product_id="2", price=-1.0,
-                           time=date.today(), quantity=16.0, name="new")
-        response = self.app.post("/shopcarts/1/items", json=product.serialize())
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        product = Products(user_id="1", product_id="2", price=1.0,
-                           time=date.today(), quantity=0, name="new")
-        response = self.app.post("/shopcarts/1/items", json=product.serialize())
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
