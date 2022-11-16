@@ -198,52 +198,6 @@ class TestProductsModel(unittest.TestCase):
         products = Products.all()
         self.assertEqual(len(products), 5)
 
-    def test_serialize_a_product(self):
-        """It should serialize a Product"""
-        product = ProductsFactory()
-        data = product.serialize()
-        self.assertNotEqual(data, None)
-        self.assertIn("id", data)
-        self.assertEqual(data["id"], product.id)
-        self.assertIn("name", data)
-        self.assertEqual(data["name"], product.name)
-        self.assertIn("user_id", data)
-        self.assertEqual(data["user_id"], product.user_id)
-        self.assertIn("product_id", data)
-        self.assertEqual(data["product_id"], product.product_id)
-        self.assertIn("time", data)
-        self.assertEqual(date.fromisoformat(data["time"]), product.time)
-        self.assertIn("price", data)
-        self.assertEqual(data["price"], product.price)
-        self.assertIn("quantity", data)
-        self.assertEqual(data["quantity"], product.quantity)
-
-    def test_deserialize_a_product(self):
-        """It should de-serialize a Product"""
-        data = ProductsFactory().serialize()
-        product = Products()
-        product.deserialize(data)
-        self.assertNotEqual(product, None)
-        self.assertEqual(product.id, None)
-        self.assertEqual(product.name, data["name"])
-        self.assertEqual(product.user_id, data["user_id"])
-        self.assertEqual(product.product_id, data["product_id"])
-        self.assertEqual(product.price, data["price"])
-        self.assertEqual(product.quantity, data["quantity"])
-        self.assertEqual(product.time, date.fromisoformat(data["time"]))
-
-    def test_deserialize_missing_data(self):
-        """It should not deserialize a Product with missing data"""
-        data = {"id": 1, "name": "Spoon", "user_id": "1"}
-        product = Products()
-        self.assertRaises(DataValidationError, product.deserialize, data)
-
-    def test_deserialize_bad_data(self):
-        """It should not deserialize bad data"""
-        data = "this is not a dictionary"
-        product = Products()
-        self.assertRaises(DataValidationError, product.deserialize, data)
-
     def test_find_by_name(self):
         """It should Find a Product by Name"""
         products = ProductsFactory.create_batch(5)
@@ -300,6 +254,99 @@ class TestProductsModel(unittest.TestCase):
         self.assertEqual(found[0].price, products[0].price)
         self.assertEqual(found[0].quantity, products[0].quantity)
         self.assertEqual(found[0].time, products[0].time)
+
+
+class TestProductsDeserialize(unittest.TestCase):
+    """ Test Cases for Products Model serialize and deserialize function """
+
+    @classmethod
+    def setUpClass(cls):
+        """ This runs once before the entire test suite """
+        app.config["TESTING"] = True
+        app.config["DEBUG"] = False
+        app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
+        app.logger.setLevel(logging.CRITICAL)
+        Products.init_db(app)
+        Shopcarts.init_db(app)
+
+    @classmethod
+    def tearDownClass(cls):
+        """ This runs once after the entire test suite """
+        db.drop_all()
+        db.create_all()
+        db.session.commit()
+        db.session.close()
+
+    def setUp(self):
+        """ This runs before each test """
+        db.session.query(Products).delete()  # clean up the last tests
+        db.session.query(Shopcarts).delete()  # clean up the last tests
+        db.session.commit()
+
+    def tearDown(self):
+        """ This runs after each test """
+        db.session.remove()
+
+    ######################################################################
+    #  T E S T   C A S E S
+    ######################################################################
+
+    def test_serialize_a_product(self):
+        """It should serialize a Product"""
+        product = ProductsFactory()
+        data = product.serialize()
+        self.assertNotEqual(data, None)
+        self.assertIn("id", data)
+        self.assertEqual(data["id"], product.id)
+        self.assertIn("name", data)
+        self.assertEqual(data["name"], product.name)
+        self.assertIn("user_id", data)
+        self.assertEqual(data["user_id"], product.user_id)
+        self.assertIn("product_id", data)
+        self.assertEqual(data["product_id"], product.product_id)
+        self.assertIn("time", data)
+        self.assertEqual(date.fromisoformat(data["time"]), product.time)
+        self.assertIn("price", data)
+        self.assertEqual(data["price"], product.price)
+        self.assertIn("quantity", data)
+        self.assertEqual(data["quantity"], product.quantity)
+
+    def test_deserialize_a_product(self):
+        """It should de-serialize a Product"""
+        data = ProductsFactory().serialize()
+        product = Products()
+        product.deserialize(data)
+        self.assertNotEqual(product, None)
+        self.assertEqual(product.id, None)
+        self.assertEqual(product.name, data["name"])
+        self.assertEqual(product.user_id, data["user_id"])
+        self.assertEqual(product.product_id, data["product_id"])
+        self.assertEqual(product.price, data["price"])
+        self.assertEqual(product.quantity, data["quantity"])
+        self.assertEqual(product.time, date.fromisoformat(data["time"]))
+
+    def test_deserialize_missing_data(self):
+        """It should not deserialize a Product with missing data"""
+        data = {"id": 1, "name": "Spoon", "user_id": "1"}
+        product = Products()
+        self.assertRaises(DataValidationError, product.deserialize, data)
+
+    def test_deserialize_bad_data(self):
+        """It should not deserialize bad data"""
+        data = "this is not a dictionary"
+        product = Products()
+        self.assertRaises(DataValidationError, product.deserialize, data)
+
+    def test_deserialize_wrong_data(self):
+        """It should not Create a Product with wrong data"""
+        product = Products()
+        data = {"user_id": 1, "product_id": 2, "price": -1.0,
+                "time": date.today(), "quantity": 16.0, "name": "new"}
+        self.assertRaises(DataValidationError, product.deserialize, data)
+        product = Products()
+        data = {"user_id": 1, "product_id": 2, "price": 1.0,
+                "time": date.today(), "quantity": 0, "name": "new"}
+        self.assertRaises(DataValidationError, product.deserialize, data)
 
 
 class TestShopcartsModel(unittest.TestCase):
