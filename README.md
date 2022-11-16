@@ -1,7 +1,7 @@
 # This is the project for our shopcarts team
 
 [![Build Status](https://github.com/2022-DevOps-Shopcarts/shopcarts/actions/workflows/workflow.yml/badge.svg)](https://github.com/2022-DevOps-Shopcarts/shopcarts/actions)
-[![codecov](https://codecov.io/gh/2022-DevOps-Shopcarts/shopcarts/branch/main/graph/badge.svg?token=7E17S7VS4E)](https://codecov.io/gh/2022-DevOps-Shopcarts/shopcarts)
+[![codecov](https://codecov.io/gh/CSCI-GA-2820-FA22-003/shopcarts/branch/main/graph/badge.svg?token=7E17S7VS4E)](https://codecov.io/gh/CSCI-GA-2820-FA22-003/shopcarts)
 
 ## Important: Before you submit a pull request. Make sure
 
