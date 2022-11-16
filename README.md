@@ -3,6 +3,14 @@
 [![Build Status](https://github.com/2022-DevOps-Shopcarts/shopcarts/actions/workflows/workflow.yml/badge.svg)](https://github.com/2022-DevOps-Shopcarts/shopcarts/actions)
 [![codecov](https://codecov.io/gh/CSCI-GA-2820-FA22-003/shopcarts/branch/main/graph/badge.svg?token=7E17S7VS4E)](https://codecov.io/gh/CSCI-GA-2820-FA22-003/shopcarts)
 
+## The service has been deployed to IBM clod
+
+- The url is http://169.51.205.153/
+
+- The development version of the app is on port 31001
+
+- The production version of the app is on port 31002
+
 ## Important: Before you submit a pull request. Make sure
 
 - Run `nosetests` to make sure that all tests are passed and code coverage are no less than 95%
