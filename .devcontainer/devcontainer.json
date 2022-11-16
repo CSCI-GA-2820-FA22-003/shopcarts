@@ -21,9 +21,19 @@
 		"LittleFoxTeam.vscode-python-test-adapter",
 		"njpwerner.autodocstring",
 		"redhat.vscode-yaml",
+		"ms-azuretools.vscode-docker",
+		"inercia.vscode-k3d",
 		"streetsidesoftware.code-spell-checker",
 		"wholroyd.jinja",
 		"bbenoist.vagrant"
 	],
-	"postCreateCommand": "sudo pip install -r requirements.txt"
+	"postCreateCommand": "sudo pip install -r requirements.txt",
+	"features": {
+		"docker-in-docker": "latest",
+		"kubectl-helm-minikube": {
+			"version": "latest",
+			"helm": "latest",
+			"minikube": "none"
+		}
+	}
 }

@@ -1,0 +1,19 @@
+---
+# This manifest deploys a Python Flask application with a Cloudant database
+# To change the hostname deploy with:
+#   cf push "${CF_APP}" -n <new-hostname>
+applications:
+- name: shopcarts
+  path: .
+  instances: 2
+  memory: 128M
+  hostname: shopcarts
+  domain: us-south.cf.appdomain.cloud
+  disk_quota: 1024M
+  buildpack: python_buildpack
+  timeout: 180
+  services:
+  - Cloudant
+  env:
+    FLASK_APP : service:app
+    FLASK_DEBUG : false
