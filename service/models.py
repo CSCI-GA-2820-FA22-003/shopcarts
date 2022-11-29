@@ -105,6 +105,17 @@ class Shopcarts(db.Model):
             ) from error
         return self
 
+    def empty(self):
+        """
+        Empty a Shopcart
+        """
+        logger.info("Emptying %s", self.user_id)
+        products_in_shopcart = self.products
+        for product in products_in_shopcart:
+            logger.info("Deleting %s", product.name)
+            db.session.delete(product)
+        db.session.commit()
+
     @classmethod
     def init_db(cls, app):
         """ Initializes the database session """
