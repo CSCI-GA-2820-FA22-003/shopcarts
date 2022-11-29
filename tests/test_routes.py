@@ -382,6 +382,24 @@ class TestYourResourceServer(TestCase):
         resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items?max-price=5&min-price=1")
         self.assertEqual(len(resp.get_json()), 2)
 
+    def test_empty_shopcarts(self):
+        """ It should Empty a Shopcart """
+        shopcart = ShopcartsFactory()
+        logging.debug("Test Shopcart: %s", shopcart.serialize())
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        products = self._create_products(1, shopcart.user_id)
+        product = products[0]
+        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(Products.all()), 1)
+        resp = self.app.put(f"/shopcarts/{shopcart.user_id}/empty")
+        self.assertEqual(resp.get_json()["products"], [])
+        self.assertEqual(len(Products.all()), 0)
+        # make sure shopcart is deleted
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}")
+        data = resp.get_json()
+        self.assertEqual(data["products"], [])
+
     ######################################################################
     #  T E S T   S A D   P A T H S
     ######################################################################

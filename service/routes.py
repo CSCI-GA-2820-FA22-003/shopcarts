@@ -109,7 +109,7 @@ def list_shopcarts():
     user_id = args.get("user-id", default="", type=str)
     if user_id:
         shopcarts = []
-        shopcarts = Shopcarts.find_by_user_id(user_id)
+        shopcarts = Shopcarts.find_by_user_id(user_id).all()
     else:
         shopcarts = []
         shopcarts = Shopcarts.all()
@@ -320,6 +320,32 @@ def delete_a_product(user_id, product_id):
 
     app.logger.info("Product %s in shopcart %s was deleted.", product_id, user_id)
     return "", status.HTTP_204_NO_CONTENT
+
+######################################################################
+# EMPTY A SHOPCART
+######################################################################
+
+
+@app.route("/shopcarts/<user_id>/empty", methods=["PUT"])
+def empty_shopcarts(user_id):
+    """Empty a shopcart
+    Args:
+        user_id (str): the user_id of the shopcart
+    Returns:
+        dict: the emptied shopcart
+    """
+    app.logger.info(f"Request to Reset shopcart {user_id}...")
+
+    # Get the current shopcart
+    shopcarts = Shopcarts.find_by_user_id(user_id).all()
+    if shopcarts is None:
+        abort(status.HTTP_404_NOT_FOUND, f"Shopcart {user_id} does not exist")
+
+    # empty the shopcart
+    shopcart = shopcarts[0]
+    shopcart.empty()
+
+    return jsonify(shopcart.serialize())
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
