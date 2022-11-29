@@ -356,6 +356,32 @@ class TestYourResourceServer(TestCase):
         resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_query_products(self):
+        """ It should Return Products satisfied the query """
+        shopcart = ShopcartsFactory()
+        self.app.post("/shopcarts", json=shopcart.serialize())
+        product = Products(user_id=shopcart.user_id, product_id="1", name="Pen",
+                           price=4, time=date(2011, 1, 2), quantity=1)
+        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(Products.all()), 1)
+        product = Products(user_id=shopcart.user_id, product_id="2", name="Pencil",
+                           price=2, time=date(2011, 1, 2), quantity=1)
+        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(Products.all()), 2)
+        product = Products(user_id=shopcart.user_id, product_id="3", name="Melon",
+                           price=6, time=date(2011, 1, 2), quantity=1)
+        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(Products.all()), 3)
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items")
+        self.assertEqual(len(resp.get_json()), 3)
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items?max-price=9&min-price=5")
+        self.assertEqual(len(resp.get_json()), 1)
+        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items?max-price=5&min-price=1")
+        self.assertEqual(len(resp.get_json()), 2)
+
     ######################################################################
     #  T E S T   S A D   P A T H S
     ######################################################################

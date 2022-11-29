@@ -297,10 +297,25 @@ class Products(db.Model):
 
     @classmethod
     def find_by_user_id(cls, user_id):
-        """Returns all Products with the given name
+        """Returns all Products with the user id
 
         Args:
-            name (string): the name of the Products you want to match
+            user_id (string): the user_id of the Products you want to match
         """
         logger.info("Processing user_id query for %s ...", user_id)
         return cls.query.filter(cls.user_id == user_id)
+
+    @classmethod
+    def find_product(cls, user_id, max_price, min_price):
+        """Returns all Products with the given query parameter
+
+        Args:
+            max_price (float): the highest price you want to query
+            min_price (float): the lowest price you want to query
+        """
+        query_info = f"user id: {user_id}"
+        query_info += f"max price: {max_price} "
+        query_info += f"min price: {min_price}"
+        logger.info("Processing product query for %s ...", query_info)
+        return cls.query.filter(and_(cls.user_id == user_id,
+                                cls.price <= max_price, cls.price >= min_price))

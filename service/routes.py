@@ -105,8 +105,14 @@ def list_shopcarts():
         list: the list of all shopcarts and their contents
     """
     app.logger.info("Request for shopcart list")
-    shopcarts = []
-    shopcarts = Shopcarts.all()
+    args = request.args
+    user_id = args.get("user-id", default="", type=str)
+    if user_id:
+        shopcarts = []
+        shopcarts = Shopcarts.find_by_user_id(user_id)
+    else:
+        shopcarts = []
+        shopcarts = Shopcarts.all()
 
     results = [shopcart.serialize() for shopcart in shopcarts]
     app.logger.info("Returning %d shopcarts", len(results))
@@ -237,11 +243,14 @@ def list_all_products(user_id):
     Returns:
         list: the list of products in the shopcart
     """
+    args = request.args
+    max_price = args.get("max-price", default=float('inf'), type=float)
+    min_price = args.get("min-price", default=-float('inf'), type=float)
     shopcarts = Shopcarts.find_by_user_id(user_id).all()
     if len(shopcarts) == 0:
         abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
     app.logger.info(f"Read all products in the shopcart {user_id}")
-    products = Products.find_by_user_id(user_id).all()
+    products = Products.find_product(user_id, max_price, min_price).all()
 
     # Return the list of products
     app.logger.info("Returning products")
