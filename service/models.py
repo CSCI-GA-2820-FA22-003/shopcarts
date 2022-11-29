@@ -226,8 +226,8 @@ class Products(db.Model):
             self.user_id = data["user_id"]
             self.product_id = data["product_id"]
             self.name = data["name"]
-            self.quantity = data["quantity"]
-            self.price = data["price"]
+            self.quantity = float(data["quantity"])
+            self.price = float(data["price"])
             self.time = date.fromisoformat(data["time"])
         except KeyError as error:
             raise DataValidationError(

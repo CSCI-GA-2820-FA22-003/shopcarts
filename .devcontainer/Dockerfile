@@ -1,5 +1,5 @@
 # Image for a Python 3 development environment
-FROM python:3.9-slim
+FROM rofrano/pipeline-selenium:latest
 
 # Add any tools that are needed beyond Python 3
 RUN apt-get update && \
@@ -20,7 +20,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && chmod 0440 /etc/sudoers.d/$USERNAME
 
 # Added libraries for PostgreSQL
-RUN apt-get install -y gcc libpq-dev
+RUN apt-get update && apt-get install -y gcc libpq-dev
 
 # Set up the Python development environment
 WORKDIR /app
