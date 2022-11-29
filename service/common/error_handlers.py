@@ -19,14 +19,14 @@ Module: error_handlers
 """
 from flask import jsonify
 from service.models import DataValidationError, DatabaseConnectionError
-from service import app
+from service import app, api
 from . import status
 
 
 ######################################################################
 # Error Handlers
 ######################################################################
-@app.errorhandler(DataValidationError)
+@api.errorhandler(DataValidationError)
 def request_validation_error(error):
     """Handles Value Errors from bad data"""
     message = str(error)
