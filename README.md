@@ -1,6 +1,7 @@
 # This is the project for our shopcarts team
 
 [![Build Status](https://github.com/2022-DevOps-Shopcarts/shopcarts/actions/workflows/workflow.yml/badge.svg)](https://github.com/2022-DevOps-Shopcarts/shopcarts/actions)
+[![BDD Tests](https://github.com/CSCI-GA-2820-FA22-003/shopcarts/actions/workflows/bdd.yml/badge.svg)](https://github.com/CSCI-GA-2820-FA22-003/shopcarts/actions/workflows/bdd.yml)
 [![codecov](https://codecov.io/gh/CSCI-GA-2820-FA22-003/shopcarts/branch/main/graph/badge.svg?token=7E17S7VS4E)](https://codecov.io/gh/CSCI-GA-2820-FA22-003/shopcarts)
 
 ## The service has been deployed to IBM clod
