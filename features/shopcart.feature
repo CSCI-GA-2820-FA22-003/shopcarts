@@ -91,4 +91,34 @@ Scenario: Delete a shopcart
     Then I should not see "pen" in the results
     Then I should not see "food" in the results
     Then I should not see "water" in the results
-    
+    When I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I press the "Read this" button
+    Then I should see the message "404 Not Found: Shopcart with id '1' was not found."
+
+Scenario: Empty a shopcart
+    When I visit the "home page"
+    And I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I press the "Empty" button
+    Then I should see the message "Shopcart has been emptied!"
+    When I press the "List" button
+    Then I should not see "pen" in the results
+    Then I should not see "food" in the results
+    Then I should not see "water" in the results
+    When I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I press the "Read this" button
+    Then I should see the message "No items in current shopcart"
+
+Scenario: Query a product with max and min price
+    When I visit the "home page"
+    And I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I set the "Max Price" to "5"
+    And I set the "Min Price" to "3"
+    And I press the "Query" button
+    Then I should see the message "Success"
+    Then I should not see "pen" in the results
+    Then I should see "food" in the results
+    Then I should not see "water" in the results
