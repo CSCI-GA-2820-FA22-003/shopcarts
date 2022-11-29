@@ -70,3 +70,25 @@ Scenario: Update a product
     When I press the "List" button
     Then I should see "new_test" in the results
     Then I should not see "pen" in the results
+
+Scenario: Delete a product
+    When I visit the "home page"
+    And I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I set the "Product ID" to "3"
+    And I press the "Delete record" button
+    Then I should see the message "Item has been Deleted!"
+    When I press the "List" button
+    Then I should not see "pen" in the results
+
+Scenario: Delete a shopcart
+    When I visit the "home page"
+    And I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I press the "Delete" button
+    Then I should see the message "Shopcart has been Deleted!"
+    When I press the "List" button
+    Then I should not see "pen" in the results
+    Then I should not see "food" in the results
+    Then I should not see "water" in the results
+    
