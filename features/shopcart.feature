@@ -55,3 +55,18 @@ Scenario: List all shopcarts
     And I should see "pen" in the results
     And I should see "food" in the results
     And I should not see "pig" in the results
+
+Scenario: Update a product
+    When I visit the "home page"
+    And I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I set the "Product ID" to "3"
+    And I set the "Name" to "new_test"
+    And I set the "Price" to "5"
+    And I set the "Quantity" to "4"
+    And I set the "Time" to "02-02-2023"
+    And I press the "Update" button
+    Then I should see the message "Success"
+    When I press the "List" button
+    Then I should see "new_test" in the results
+    Then I should not see "pen" in the results
