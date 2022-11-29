@@ -255,6 +255,28 @@ class TestProductsModel(unittest.TestCase):
         self.assertEqual(found[0].quantity, products[0].quantity)
         self.assertEqual(found[0].time, products[0].time)
 
+    def test_query_product(self):
+        """It should query product with max price or min price"""
+        shopcart = ShopcartsFactory()
+        logging.debug(shopcart)
+        shopcart.id = None
+        shopcart.create()
+        product = Products(user_id=shopcart.user_id, product_id="1", name="Pen",
+                           price=4, time=date(2011, 1, 2), quantity=1)
+        product.create()
+        product = Products(user_id=shopcart.user_id, product_id="2", name="Pencil",
+                           price=2, time=date(2011, 1, 2), quantity=1)
+        product.create()
+        product = Products(user_id=shopcart.user_id, product_id="3", name="Melon",
+                           price=6, time=date(2011, 1, 2), quantity=1)
+        product.create()
+        found_product1 = Products.find_product(shopcart.user_id, float("inf"), -float("inf")).all()
+        found_product2 = Products.find_product(shopcart.user_id, 3, 1).all()
+        found_product3 = Products.find_product(shopcart.user_id, 5, 3).all()
+        self.assertEqual(len(found_product1), 3)
+        self.assertEqual(len(found_product2), 1)
+        self.assertEqual(len(found_product3), 1)
+
 
 class TestProductsDeserialize(unittest.TestCase):
     """ Test Cases for Products Model serialize and deserialize function """
