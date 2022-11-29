@@ -177,7 +177,7 @@ $(function () {
                 
                 let table = '<table class="table table-striped" cellpadding="10">'
                 table += '<thead><tr>'
-                table += '<th class="col-md-2">ID</th>'
+                table += '<th class="col-md-2">ProductID</th>'
                 table += '<th class="col-md-2">Name</th>'
                 table += '<th class="col-md-2">UserID</th>'
                 table += '<th class="col-md-2">price</th>'
@@ -190,7 +190,7 @@ $(function () {
                     let products = shopcart.products;
                     for(let i = 0; i < products.length; i++) {
                         let product = products[i];
-                        table +=  `<tr id="row_${i}"><td>${product.id}</td><td>${product.name}</td><td>${product.user_id}</td><td>${product.price}</td><td>${product.quantity}</td><td>${product.time}</td></tr>`;
+                        table +=  `<tr id="row_${i}"><td>${product.product_id}</td><td>${product.name}</td><td>${product.user_id}</td><td>${product.price}</td><td>${product.quantity}</td><td>${product.time}</td></tr>`;
                         if (i == 0) {
                             firstProduct = product;
                         }
@@ -336,7 +336,7 @@ $(function () {
             }else{
                 let table = '<table class="table table-striped" cellpadding="10">'
                 table += '<thead><tr>'
-                table += '<th class="col-md-2">ID</th>'
+                table += '<th class="col-md-2">ProductID</th>'
                 table += '<th class="col-md-2">Name</th>'
                 table += '<th class="col-md-2">UserID</th>'
                 table += '<th class="col-md-2">price</th>'
@@ -346,7 +346,7 @@ $(function () {
                 let firstProduct = "";
                 for(let i = 0; i < res.length; i++) {
                     let product = res[i];
-                    table +=  `<tr id="row_${i}"><td>${product.id}</td><td>${product.name}</td><td>${product.user_id}</td><td>${product.price}</td><td>${product.quantity}</td><td>${product.time}</td></tr>`;
+                    table +=  `<tr id="row_${i}"><td>${product.product_id}</td><td>${product.name}</td><td>${product.user_id}</td><td>${product.price}</td><td>${product.quantity}</td><td>${product.time}</td></tr>`;
                     if (i == 0) {
                         firstProduct = product;
                     }
@@ -362,6 +362,89 @@ $(function () {
             flash_message(res.responseJSON.message)
         });
 
+    });
+
+    // ****************************************
+    //  Empty a shopcart
+    // ****************************************
+
+    $("#empty-btn").click(function () {
+
+        let user_id = $("#user_id").val();
+
+        $("#flash_message").empty();
+        if(!user_id){
+            flash_message("Please fill userID")
+        }else{
+            let ajax = $.ajax({
+                type: "PUT",
+                url: `/shopcarts/${user_id}/empty`,
+                contentType: "application/json",
+                data: '',
+            })
+
+            ajax.done(function(res){
+                clear_form_data()
+                flash_message("Shopcart has been emptied!")
+            });
+
+            ajax.fail(function(res){
+                flash_message("Server error!")
+            });
+        }
+    });
+
+    // ****************************************
+    // Query products using max and min price
+    // ****************************************
+
+    $("#query-btn").click(function () {
+
+        let user_id = $("#user_id").val();
+        let max_price = $("#max_price").val();
+        let min_price = $("#min_price").val();
+
+        $("#flash_message").empty();
+        if(!user_id||!max_price||!min_price){
+            flash_message("Please fill userID and Max price and Min price")
+        }else{
+            let ajax = $.ajax({
+                type: "GET",
+                url: `/shopcarts/${user_id}/items?max-price=${max_price}&min-price=${min_price}`,
+                contentType: "application/json",
+                data: ''
+            })
+    
+            ajax.done(function(res){
+                //alert(res.toSource())
+                $("#search_results").empty();
+                let table = '<table class="table table-striped" cellpadding="10">'
+                table += '<thead><tr>'
+                table += '<th class="col-md-2">ProductID</th>'
+                table += '<th class="col-md-2">Name</th>'
+                table += '<th class="col-md-2">UserID</th>'
+                table += '<th class="col-md-2">price</th>'
+                table += '<th class="col-md-2">quantity</th>'
+                table += '<th class="col-md-2">recordTime</th>'
+                table += '</tr></thead><tbody>'
+                let firstProduct = "";
+                for(let i = 0; i < res.length; i++) {
+                    let product = res[i];
+                    table +=  `<tr id="row_${i}"><td>${product.product_id}</td><td>${product.name}</td><td>${product.user_id}</td><td>${product.price}</td><td>${product.quantity}</td><td>${product.time}</td></tr>`;
+                    if (i == 0) {
+                        firstProduct = product;
+                    }
+                }
+                table += '</tbody></table>';
+                $("#search_results").append(table);
+                flash_message("Success")
+            });
+    
+            ajax.fail(function(res){
+                clear_form_data()
+                flash_message(res.responseJSON.message)
+            });
+        }
     });
 
 })
