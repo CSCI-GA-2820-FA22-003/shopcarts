@@ -31,9 +31,10 @@
                 <input type="text" class="form-control" id="user_id" placeholder="Enter ID of User">
               </div>
               <div class="col-sm-4">
-                <button type="submit" class="btn btn-success" id="new-cart-btn">Create Shopcart</button>
-                <button type="submit" class="btn btn-primary" id="read-all-btn">Read this</button>
+                <button type="submit" class="btn btn-success" id="create-shopcart-btn">Create Shopcart</button>
+                <button type="submit" class="btn btn-primary" id="read-this-btn">Read this</button>
                 <button type="submit" class="btn btn-danger" id="delete-btn">Delete</button>
+                <button type="submit" class="btn btn-danger" id="list-btn">List</button>
               </div>
             </div>
           </div> <!-- form horizontal -->
@@ -47,16 +48,16 @@
                 <input type="text" class="form-control" id="product_id" placeholder="Enter UserID for Product">
               </div>
               <div class="col-sm-4">
-                <button type="submit" class="btn btn-primary" id="retrieve-btn">Retrieve record</button>
-                <button type="submit" class="btn btn-danger" id="delete-item-btn">Delete record</button>
+                <button type="submit" class="btn btn-primary" id="retrieve-record-btn">Retrieve record</button>
+                <button type="submit" class="btn btn-danger" id="delete-record-btn">Delete record</button>
               </div>
             </div>
 
             <!-- NAME -->
             <div class="form-group">
-              <label class="control-label col-sm-2" for="product_name">Name:</label>
+              <label class="control-label col-sm-2" for="name">Name:</label>
               <div class="col-sm-10">
-                <input type="text" class="form-control" id="product_name" placeholder="Enter name for Product">
+                <input type="text" class="form-control" id="name" placeholder="Enter name for Product">
               </div>
             </div>
 
@@ -76,11 +77,11 @@
               </div>
             </div>
 
-            <!-- recordTime -->
+            <!-- Time -->
             <div class="form-group">
-              <label class="control-label col-sm-2" for="record_time">recordTime:</label>
+              <label class="control-label col-sm-2" for="time">Time:</label>
               <div class="col-sm-10">
-                <input type="date" class="form-control" id="record_time" placeholder="2020-04-01">
+                <input type="date" class="form-control" id="time" placeholder="2020-04-01">
               </div>
             </div>
 
@@ -107,7 +108,7 @@
             <th class="col-md-4">UserID</th>
             <th class="col-md-3">price</th>
             <th class="col-md-3">quantity</th>
-            <th class="col-md-3">recordTime</th>
+            <th class="col-md-3">Time</th>
           </tr>
           </thead>
         </table>
