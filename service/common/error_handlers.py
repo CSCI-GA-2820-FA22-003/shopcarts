@@ -18,7 +18,7 @@
 Module: error_handlers
 """
 from flask import jsonify
-from service.models import DataValidationError
+from service.models import DataValidationError, DatabaseConnectionError
 from service import app
 from . import status
 
@@ -29,8 +29,24 @@ from . import status
 @app.errorhandler(DataValidationError)
 def request_validation_error(error):
     """Handles Value Errors from bad data"""
-    return bad_request(error)
+    message = str(error)
+    app.logger.error(message)
+    return {
+        'status_code': status.HTTP_400_BAD_REQUEST,
+        'error': 'Bad Request',
+        'message': message
+    }, status.HTTP_400_BAD_REQUEST
 
+@api.errorhandler(DatabaseConnectionError)
+def database_connection_error(error):
+    """ Handles Database Errors from connection attempts """
+    message = str(error)
+    app.logger.critical(message)
+    return {
+        'status_code': status.HTTP_503_SERVICE_UNAVAILABLE,
+        'error': 'Service Unavailable',
+        'message': message
+    }, status.HTTP_503_SERVICE_UNAVAILABLE
 
 @app.errorhandler(status.HTTP_400_BAD_REQUEST)
 def bad_request(error):
