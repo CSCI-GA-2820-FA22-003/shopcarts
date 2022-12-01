@@ -5,19 +5,14 @@ Describe what your service does here
 """
 # pylint: disable=cyclic-import
 import secrets
+from functools import wraps
 from flask import jsonify, request, url_for, abort
-from flask_restx import Api, Resource, fields, reqparse, inputs
+from flask_restx import fields, reqparse
 from service.models import Products, Shopcarts
 from .common import status  # HTTP Status Codes
 # Import Flask application
 from . import app, api
 
-######################################################################
-# Function to generate a random API key (good for testing)
-######################################################################
-def generate_apikey():
-    """ Helper function used when testing API keys """
-    return secrets.token_hex(16)
 
 ############################################################
 # Health Endpoint
@@ -36,35 +31,54 @@ def index():
     """ Root URL response """
     return app.send_static_file("index.html")
 
+
 # Define the model so that the docs reflect what can be sent
 shopcart_model = api.model('Shopcart', {
-    'id': fields.String(required=True,
-                          description='The name of the Pet'),
-    'user_id': fields.String(required=True,
-                              description='The category of Pet (e.g., dog, cat, fish, etc.)'),
+    'id': fields.String(required=True, description='The id of Shopcart'),
+    'user_id': fields.String(required=True, description='The user who own this shopcart'),
 })
 
 product_model = api.model('Product', {
-    'id': fields.Integer(required=True,
-                          description='The name of the Pet'),
-    'user_id': fields.String(required=True,
-                              description='The category of Pet (e.g., dog, cat, fish, etc.)'),
-    'product_id': fields.String(required=True,
-                                description='Is the Pet available for purchase?'),
-    'quantity': fields.Float(required=True,
-                                 description='Is the Pet available for purchase?'),       
-    'name': fields.String(required=True,
-                          description='The name of the Pet'),            
-    'quantity': fields.Float(required=True,
-            description='Is the Pet available for purchase?'),           
-    'time': fields.Date(required=True, description='The day the pet was born')
+    'id': fields.Integer(required=True, description='The id of the record'),
+    'user_id': fields.String(required=True, description='The user_id of the product who buy it'),
+    'product_id': fields.String(required=True, description='The id of the product'),
+    'quantity': fields.Float(required=True, description='The quantity of products in shopcart'),
+    'name': fields.String(required=True, description='The name of the Product'),
+    'price': fields.Float(required=True, description='The price of the product'),
+    'time': fields.Date(required=True, description='The day the record was created')
 })
 
 # query string arguments
 product_args = reqparse.RequestParser()
-product_args.add_argument('user_id', type=str, required=False, help='List Pets by name')
-product_args.add_argument('product_id', type=str, required=False, help='List Pets by category')
+product_args.add_argument('user_id', type=str, required=False, help='List records by user_id')
+product_args.add_argument('product_id', type=str, required=False, help='List records by category')
 product_args.add_argument('name', type=str, required=False, help='List Pets by availability')
+
+
+######################################################################
+# Authorization Decorator
+######################################################################
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'X-Api-Key' in request.headers:
+            token = request.headers['X-Api-Key']
+
+        if app.config.get('API_KEY') and app.config['API_KEY'] == token:
+            return f(*args, **kwargs)
+        else:
+            return {'message': 'Invalid or missing token'}, 401
+    return decorated
+
+
+######################################################################
+# Function to generate a random API key (good for testing)
+######################################################################
+def generate_apikey():
+    """ Helper function used when testing API keys """
+    return secrets.token_hex(16)
+
 
 #######################################################################
 # REST API
@@ -322,10 +336,6 @@ def update_a_product(user_id, product_id):
     originial_id = products[0].id
     product = products[0]
     product.deserialize(request.get_json())
-    if product.price < 0:
-        abort(status.HTTP_400_BAD_REQUEST, "Price should not be negative")
-    elif product.quantity <= 0:
-        abort(status.HTTP_400_BAD_REQUEST, "Quantity should be positive")
     product.id = originial_id
     product.update()
 

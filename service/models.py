@@ -24,8 +24,10 @@ def init_db(app):
 class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
 
+
 class DatabaseConnectionError(Exception):
     """Custom Exception when database connection fails"""
+
 
 class Shopcarts(db.Model):
     """
@@ -44,6 +46,8 @@ class Shopcarts(db.Model):
         """
         Creates a Shopcart and add it to the database
         """
+        if self.user_id is None:  # user_id is the only required field
+            raise DataValidationError("user_id attribute is not set")
         logger.info("Creating %s", self.user_id)
         shopcarts = self.find_by_user_id(self.user_id)
         if len(shopcarts.all()) > 0:

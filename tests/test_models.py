@@ -369,6 +369,10 @@ class TestProductsDeserialize(unittest.TestCase):
         data = {"user_id": 1, "product_id": 2, "price": 1.0,
                 "time": date.today(), "quantity": 0, "name": "new"}
         self.assertRaises(DataValidationError, product.deserialize, data)
+        product = Products()
+        data = {"user_id": 1, "product_id": 2, "price": 1.0,
+                "time": date.today(), "quantity": -1.0, "name": "new"}
+        self.assertRaises(DataValidationError, product.deserialize, data)
 
 
 class TestShopcartsModel(unittest.TestCase):

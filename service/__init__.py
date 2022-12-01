@@ -38,11 +38,9 @@ api = Api(app,
           description='This is a shopcarts server.',
           default='shopcarts',
           default_label='Shopcarts operations',
-          doc='/apidocs/', # default also could use doc='/apidocs/'
+          doc='/apidocs/',  # default also could use doc='/apidocs/'
           authorizations=authorizations,
-          prefix='/api'
-         )
-         
+          prefix='/api')
 # Dependencies require we import the routes AFTER the Flask app is created
 # pylint: disable=wrong-import-position, wrong-import-order
 from service import routes       # noqa: E402, E261

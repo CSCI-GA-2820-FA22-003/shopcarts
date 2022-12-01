@@ -11,7 +11,7 @@ from datetime import date
 from unittest import TestCase
 # from unittest.mock import MagicMock, patch
 from service import app
-from service.models import db, Products, Shopcarts, init_db
+from service.models import db, Products, Shopcarts, DataValidationError, init_db
 from service.common import status
 from tests.factories import ShopcartsFactory  # HTTP Status Codes
 from tests.factories import ProductsFactory
@@ -322,25 +322,6 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data["quantity"], new_product.quantity)
         self.assertEqual(data["price"], new_product.price)
 
-    def test_update_a_product_400_bad_reqest(self):
-        """ It should return 400 bad request """
-        shopcart = ShopcartsFactory()
-        self.app.post("/shopcarts", json=shopcart.serialize())
-        products = self._create_products(1, shopcart.user_id)
-        product = products[0]
-        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
-        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        new_product = Products(user_id=product.user_id, product_id=product.product_id, price=-15.0,
-                               time=date.today(), quantity=16.0, name="new")
-        resp = self.app.put(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}",
-                            json=new_product.serialize())
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-        new_product = Products(user_id=product.user_id, product_id=product.product_id, price=15.0,
-                               time=date.today(), quantity=-1.0, name="new")
-        resp = self.app.put(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}",
-                            json=new_product.serialize())
-        self.assertEqual(resp.status_code, status.HTTP_400_BAD_REQUEST)
-
     def test_delete_a_product(self):
         """ It should Delete a Product from the shopcart """
         shopcart = ShopcartsFactory()
@@ -406,8 +387,8 @@ class TestYourResourceServer(TestCase):
 
     def test_create_shopcart_no_data(self):
         """It should not Create a Shopcart with missing data"""
-        response = self.app.post("/shopcarts", json={})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        shopcart = Shopcarts()
+        self.assertRaises(DataValidationError, shopcart.create)
 
     def test_create_shopcart_no_content_type(self):
         """It should not Create a Shopcart with no content type"""
