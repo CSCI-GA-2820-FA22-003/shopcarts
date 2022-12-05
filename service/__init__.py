@@ -15,6 +15,8 @@ from service import config
 # Create Flask application
 app = Flask(__name__)
 
+app.url_map.strict_slashes = False
+
 app.config['SECRET_KEY'] = 'secret-for-dev'
 app.config['LOGGING_LEVEL'] = logging.INFO
 app.config['API_KEY'] = os.getenv('API_KEY')

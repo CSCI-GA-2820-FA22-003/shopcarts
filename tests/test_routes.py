@@ -10,16 +10,18 @@ import logging
 from datetime import date
 from unittest import TestCase
 # from unittest.mock import MagicMock, patch
-from service import app
+from service import app, routes
 from service.models import db, Products, Shopcarts, DataValidationError, init_db
-from service.common import status
-from tests.factories import ShopcartsFactory  # HTTP Status Codes
+from service.common import status  # HTTP Status Codes
+from tests.factories import ShopcartsFactory
 from tests.factories import ProductsFactory
 
 TEST_USER = "foo"
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/testdb"
 )
+BASE_URL = "/api/shopcarts"
+CONTENT_TYPE_JSON = "application/json"
 
 ######################################################################
 #  T E S T   C A S E S
@@ -35,6 +37,8 @@ class TestYourResourceServer(TestCase):
         """ This runs once before the entire test suite """
         app.config["TESTING"] = True
         app.config["DEBUG"] = False
+        api_key = routes.generate_apikey()
+        app.config['API_KEY'] = api_key
         # Set up the test database
         app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URI
         app.logger.setLevel(logging.CRITICAL)
@@ -51,6 +55,9 @@ class TestYourResourceServer(TestCase):
     def setUp(self):
         """ This runs before each test """
         self.app = app.test_client()
+        self.headers = {
+            'X-Api-Key': app.config['API_KEY']
+        }
         db.session.query(Products).delete()  # clean up the last tests
         db.session.query(Shopcarts).delete()  # clean up the last tests
         db.session.commit()
@@ -130,7 +137,7 @@ class TestYourResourceServer(TestCase):
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
         self.app.post("/shopcarts", json=shopcart.serialize())
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}")
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}", content_type=CONTENT_TYPE_JSON)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
         self.assertEqual(data["user_id"], shopcart.user_id)
@@ -162,11 +169,11 @@ class TestYourResourceServer(TestCase):
         products = self._make_products(2*product_num, shopcart.user_id)
 
         # update old shopcart
-        resp = self.app.put(f"/shopcarts/{shopcart.user_id}", json=products[:product_num])
+        resp = self.app.put(f"{BASE_URL}/{shopcart.user_id}", json=products[:product_num], headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
         # update shopcart
-        resp = self.app.put(f"/shopcarts/{shopcart.user_id}", json=products[product_num:])
+        resp = self.app.put(f"{BASE_URL}/{shopcart.user_id}", json=products[product_num:], headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
         # get updated shopcart items
@@ -197,11 +204,11 @@ class TestYourResourceServer(TestCase):
         resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize())
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 1)
-        resp = self.app.delete(f"/shopcarts/{shopcart.user_id}")
+        resp = self.app.delete(f"{BASE_URL}/{shopcart.user_id}", headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(len(resp.data), 0)
         # make sure shopcart is deleted
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}")
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
         # make sure product is deleted
         self.assertEqual(len(Products.all()), 0)
@@ -378,8 +385,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(len(Products.all()), 0)
         # make sure shopcart is deleted
         resp = self.app.get(f"/shopcarts/{shopcart.user_id}")
-        data = resp.get_json()
-        self.assertEqual(data["products"], [])
+        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     ######################################################################
     #  T E S T   S A D   P A T H S
