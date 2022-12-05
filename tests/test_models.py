@@ -174,7 +174,7 @@ class TestProductsModel(unittest.TestCase):
         """It should List all Products in the database"""
         products = Products.all()
         self.assertEqual(products, [])
-        # Create 5 Pets
+        # Create 5 products
         product = Products(name="Pen", user_id="1", product_id="2",
                            quantity=1.0, price=12, time=date(2020, 1, 1))
         shopcart = Shopcarts(user_id="1")
