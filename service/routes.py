@@ -33,10 +33,6 @@ def index():
 
 
 # Define the model so that the docs reflect what can be sent
-shopcart_model = api.model('Shopcart', {
-    'id': fields.String(required=True, description='The id of Shopcart'),
-    'user_id': fields.String(required=True, description='The user who own this shopcart'),
-})
 
 product_model = api.model('Product', {
     'id': fields.Integer(required=True, description='The id of the record'),
@@ -46,6 +42,13 @@ product_model = api.model('Product', {
     'name': fields.String(required=True, description='The name of the Product'),
     'price': fields.Float(required=True, description='The price of the product'),
     'time': fields.Date(required=True, description='The day the record was created')
+})
+
+product_field = fields.Raw()
+shopcart_model = api.model('Shopcart', {
+    'id': fields.String(required=True, description='The id of Shopcart'),
+    'user_id': fields.String(required=True, description='The user who own this shopcart'),
+    'products': fields.List(cls_or_instance = product_field, required=True, description='The products it have')
 })
 
 # query string arguments

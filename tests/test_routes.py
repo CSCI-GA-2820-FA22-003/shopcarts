@@ -384,8 +384,10 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.get_json()["products"], [])
         self.assertEqual(len(Products.all()), 0)
         # make sure shopcart is deleted
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}")
-        self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}")
+        data = resp.get_json()
+        print(data)
+        self.assertEqual(data["products"], [])
 
     ######################################################################
     #  T E S T   S A D   P A T H S
