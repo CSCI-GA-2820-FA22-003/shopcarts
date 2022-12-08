@@ -48,7 +48,7 @@ product_field = fields.Raw()
 shopcart_model = api.model('Shopcart', {
     'id': fields.String(required=True, description='The id of Shopcart'),
     'user_id': fields.String(required=True, description='The user who own this shopcart'),
-    'products': fields.List(cls_or_instance = product_field, required=True, description='The products it have')
+    'products': fields.List(cls_or_instance=product_field, required=True, description='The products it have')
 })
 
 # query string arguments
@@ -260,9 +260,6 @@ class ShopcartCollection(Resource):
         results = [shopcart.serialize() for shopcart in shopcarts]
         app.logger.info("Returning %d shopcarts", len(results))
         return results, status.HTTP_200_OK
-
-
-
 
 
 #######################################################################
