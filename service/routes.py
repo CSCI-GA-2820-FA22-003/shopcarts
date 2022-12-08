@@ -26,7 +26,7 @@ def health():
 ######################################################################
 # Configure the Root route before OpenAPI
 ######################################################################
-@app.route("/")
+@app.route("/app")
 def index():
     """ Root URL response """
     return app.send_static_file("index.html")
@@ -183,71 +183,91 @@ class ShopcartResource(Resource):
         app.logger.info("Shopcart %s delete complete", user_id)
         return "", status.HTTP_204_NO_CONTENT
 
+
+######################################################################
+#  PATH: /shopcarts
+######################################################################
+@api.route('/shopcarts', strict_slashes=False)
+class ShopcartCollection(Resource):
+    """
+    ShopcartCollection class
+
+    Allows the manipulation of a single shopcart
+    POST /shopcart - Create a shopcart
+    GET /shopcart - Returns all shopcarts
+    """
+
+    #######################################################################
+    # CREATE A SHOPCART
+    #######################################################################
+
+    @api.doc('create_shopcart', security='apikey')
+    @api.response(400, 'The posted data was not valid')
+    @api.expect(shopcart_model)
+    @api.marshal_with(shopcart_model, code=201)
+    @token_required
+    def post(self):
+        """Creates a new shopcart and stores it in the database
+        Args:
+            user_id (str): the user_id of the shopcart to create
+        Returns:
+            dict: the shopcart and it's value
+        """
+        app.logger.info("Request to Create shopcart")
+        check_content_type("application/json")
+
+        # See if the shopcart already exists and send an error if it does
+        shopcart = Shopcarts()
+        shopcart.deserialize(api.payload)     # check the fields are correct
+        user_id = api.payload["user_id"]
+        shopcart = Shopcarts.find_by_user_id(user_id)
+        if len(shopcart.all()) != 0:
+            abort(status.HTTP_409_CONFLICT, f"Shopcart {user_id} already exists")
+
+        # Create the new shopcart
+        shopcart = Shopcarts(user_id=user_id)
+        shopcart.create()
+        # Set the location header and return the new shopcart
+        location_url = api.url_for(ShopcartResource, user_id=user_id, _external=True)
+        return (
+            shopcart.serialize(),
+            status.HTTP_201_CREATED,
+            {"Location": location_url},
+        )
+
+    ######################################################################
+    # LIST ALL SHOPCARTS
+    ######################################################################
+
+    @api.doc('get_all_shopcartS')
+    # @api.response(404, 'Shopcart not found')
+    @api.marshal_with(shopcart_model)
+    def get(self):
+        """List all shopcarts
+        Returns:
+            list: the list of all shopcarts and their contents
+        """
+        app.logger.info("Request for shopcart list")
+        args = request.args
+        user_id = args.get("user-id", default="", type=str)
+        if user_id:
+            shopcarts = []
+            shopcarts = Shopcarts.find_by_user_id(user_id).all()
+        else:
+            shopcarts = []
+            shopcarts = Shopcarts.all()
+
+        results = [shopcart.serialize() for shopcart in shopcarts]
+        app.logger.info("Returning %d shopcarts", len(results))
+        return results, status.HTTP_200_OK
+
+
+
+
+
 #######################################################################
 # REST API
 #######################################################################
-
-#######################################################################
-# CREATE A SHOPCART
-#######################################################################
-
-
-@app.route("/shopcarts", methods=["POST"])
-def create_shopcarts():
-    """Creates a new shopcart and stores it in the database
-    Args:
-        user_id (str): the user_id of the shopcart to create
-    Returns:
-        dict: the shopcart and it's value
-    """
-    app.logger.info("Request to Create shopcart")
-    check_content_type("application/json")
-
-    # See if the shopcart already exists and send an error if it does
-    shopcart = Shopcarts()
-    shopcart.deserialize(request.get_json())     # check the fields are correct
-    user_id = request.get_json()["user_id"]
-    shopcart = Shopcarts.find_by_user_id(user_id)
-    if len(shopcart.all()) != 0:
-        abort(status.HTTP_409_CONFLICT, f"Shopcart {user_id} already exists")
-
-    # Create the new shopcart
-    shopcart = Shopcarts(user_id=user_id)
-    shopcart.create()
-    # Set the location header and return the new shopcart
-    location_url = url_for("create_shopcarts", user_id=user_id, _external=True)
-    return (
-        jsonify(shopcart.serialize()),
-        status.HTTP_201_CREATED,
-        {"Location": location_url},
-    )
-
-
-######################################################################
-# LIST ALL SHOPCARTS
-######################################################################
-
-
-@app.route("/shopcarts", methods=["GET"])
-def list_shopcarts():
-    """List all shopcarts
-    Returns:
-        list: the list of all shopcarts and their contents
-    """
-    app.logger.info("Request for shopcart list")
-    args = request.args
-    user_id = args.get("user-id", default="", type=str)
-    if user_id:
-        shopcarts = []
-        shopcarts = Shopcarts.find_by_user_id(user_id).all()
-    else:
-        shopcarts = []
-        shopcarts = Shopcarts.all()
-
-    results = [shopcart.serialize() for shopcart in shopcarts]
-    app.logger.info("Returning %d shopcarts", len(results))
-    return jsonify(results), status.HTTP_200_OK
-
 
 ######################################################################
 # ADD A PRODUCT
