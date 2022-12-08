@@ -2,8 +2,8 @@ import requests
 from behave import given
 from compare import expect
 from service import app, routes
-api_key = routes.generate_apikey()
-app.config['API_KEY'] = api_key
+# api_key = routes.generate_apikey()
+# app.config['API_KEY'] = api_key
 headers = {'X-Api-Key': app.config['API_KEY']}
 
 @given('the following shopcarts')

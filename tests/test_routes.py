@@ -398,15 +398,15 @@ class TestYourResourceServer(TestCase):
         shopcart = Shopcarts()
         self.assertRaises(DataValidationError, shopcart.create)
 
-    # def test_create_shopcart_no_content_type(self):
-    #     """It should not Create a Shopcart with no content type"""
-    #     response = self.app.post(BASE_URL)
-    #     self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+    def test_create_shopcart_no_content_type(self):
+        """It should not Create a Shopcart with no content type"""
+        response = self.app.post(BASE_URL)
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
-    # def test_create_shopcart_wrong_content_type(self):
-    #     """It should not Create a Shopcart with wrong content type"""
-    #     response = self.app.post(BASE_URL, headers={"Content-Type": "application/haha"})
-    #     self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
+    def test_create_shopcart_wrong_content_type(self):
+        """It should not Create a Shopcart with wrong content type"""
+        response = self.app.post(BASE_URL, headers={"Content-Type": "application/haha"})
+        self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     def test_unsupported_method(self):
         """It should not alloww unsupported methods"""
