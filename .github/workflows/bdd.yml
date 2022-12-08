@@ -53,7 +53,7 @@ jobs:
           curl -i http://localhost:8080/health
           echo "\n*** SERVER IS RUNNING ***"
         env:
-          DATABASE_URI: "postgresql://postgres:postgres@localhost:5432/testdb"
+          DATABASE_URI: "postgresql://postgres:pgs3cr3t@localhost:5432/testdb"
 
       - name: Run Integration Tests
         run: behave
