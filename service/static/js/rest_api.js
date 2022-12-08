@@ -4,6 +4,7 @@ $(function () {
     //  U T I L I T Y   F U N C T I O N S
     // ****************************************
 
+    let PREFIX = "/api"
     // Updates the form with data from the response
     function update_form_data(res) {
         
@@ -136,7 +137,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "POST",
-            url: `/shopcarts`,
+            url: `${PREFIX}/shopcarts`,
             contentType: "application/json",
             data: JSON.stringify(data)
         })
@@ -164,7 +165,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/shopcarts`,
+            url: `${PREFIX}/shopcarts`,
             contentType: "application/json"
         })
 
@@ -286,7 +287,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "DELETE",
-            url: `/shopcarts/${user_id}`,
+            url: `${PREFIX}/shopcarts/${user_id}`,
             contentType: "application/json",
             data: '',
         })

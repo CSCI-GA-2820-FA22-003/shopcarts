@@ -20,7 +20,7 @@ TEST_USER = "foo"
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/testdb"
 )
-BASE_URL = "/shopcarts"
+BASE_URL = "/api/shopcarts"
 CONTENT_TYPE_JSON = "application/json"
 
 ######################################################################
@@ -72,7 +72,7 @@ class TestYourResourceServer(TestCase):
         for i in range(count):
             test_shopcart = ShopcartsFactory()
             test_shopcart.user_id = str(i)
-            response = self.app.post("/shopcarts", json=test_shopcart.serialize(), headers = self.headers)
+            response = self.app.post(BASE_URL, json=test_shopcart.serialize(), headers = self.headers)
             self.assertEqual(
                 response.status_code, status.HTTP_201_CREATED, "Could not create test shopcart"
             )
@@ -113,14 +113,14 @@ class TestYourResourceServer(TestCase):
 
     def test_index(self):
         """ It should call the home page """
-        resp = self.app.get("/app")
+        resp = self.app.get("/")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_create_shopcarts(self):
         """ It should Create a Shopcart """
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
-        resp = self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        resp = self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         data = resp.get_json()
         self.assertEqual(data["user_id"], shopcart.user_id)
@@ -128,15 +128,15 @@ class TestYourResourceServer(TestCase):
     def test_create_shopcarts_409_conflicts(self):
         """ It should return a 409_conflicts """
         shopcart = ShopcartsFactory()
-        resp = self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
-        resp = self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        resp = self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
+        resp = self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         self.assertEqual(resp.status_code, status.HTTP_409_CONFLICT)
 
     def test_read_shopcarts(self):
         """ It should Read a Shopcart """
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}", content_type=CONTENT_TYPE_JSON)
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         data = resp.get_json()
@@ -147,7 +147,7 @@ class TestYourResourceServer(TestCase):
         shopcart = ShopcartsFactory()
 
         # create a shopcart
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
 
         # make product data
         product_num = 100
@@ -162,7 +162,7 @@ class TestYourResourceServer(TestCase):
         shopcart = ShopcartsFactory()
 
         # create a shopcart
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
 
         # make product data
         product_num = 5
@@ -198,7 +198,7 @@ class TestYourResourceServer(TestCase):
         """ It should Delete a Shopcart """
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         products = self._create_products(1, shopcart.user_id)
         product = products[0]
         resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers = self.headers)
@@ -217,7 +217,7 @@ class TestYourResourceServer(TestCase):
         """ It should return a 404 not found """
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart 404 not found: %s", shopcart.serialize())
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         products = self._create_products(5, shopcart.user_id)
         for product in products:
             resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers = self.headers)
@@ -236,7 +236,7 @@ class TestYourResourceServer(TestCase):
     def test_get_shopcart_list(self):
         """It should Get a list of Shopcarts"""
         self._create_shopcarts(5)
-        response = self.app.get("/shopcarts")
+        response = self.app.get(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.get_json()
         self.assertEqual(len(data), 5)
@@ -245,7 +245,7 @@ class TestYourResourceServer(TestCase):
         """ It should Create a Shopcart and add products to it"""
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
-        resp = self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        resp = self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         data = resp.get_json()
         self.assertEqual(data["user_id"], shopcart.user_id)
@@ -262,7 +262,7 @@ class TestYourResourceServer(TestCase):
         """ It should Read a Product """
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         products = self._create_products(5, shopcart.user_id)
         for product in products:
             resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers = self.headers)
@@ -278,7 +278,7 @@ class TestYourResourceServer(TestCase):
         """It should not Get a Product thats not found"""
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         response = self.app.get(f"/shopcarts/{shopcart.user_id}/items/0")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         data = response.get_json()
@@ -289,7 +289,7 @@ class TestYourResourceServer(TestCase):
         """ It should Read all Products """
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         products = self._create_products(5, shopcart.user_id)
         for product in products:
             resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers = self.headers)
@@ -301,7 +301,7 @@ class TestYourResourceServer(TestCase):
     def test_update_a_product(self):
         """ It should Update a Product """
         shopcart = ShopcartsFactory()
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         products = self._create_products(1, shopcart.user_id)
         product = products[0]
         resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers = self.headers)
@@ -332,7 +332,7 @@ class TestYourResourceServer(TestCase):
     def test_delete_a_product(self):
         """ It should Delete a Product from the shopcart """
         shopcart = ShopcartsFactory()
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         products = self._create_products(1, shopcart.user_id)
         product = products[0]
         resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers = self.headers)
@@ -347,7 +347,7 @@ class TestYourResourceServer(TestCase):
     def test_query_products(self):
         """ It should Return Products satisfied the query """
         shopcart = ShopcartsFactory()
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         product = Products(user_id=shopcart.user_id, product_id="1", name="Pen",
                            price=4, time=date(2011, 1, 2), quantity=1)
         resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers = self.headers)
@@ -374,7 +374,7 @@ class TestYourResourceServer(TestCase):
         """ It should Empty a Shopcart """
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
-        self.app.post("/shopcarts", json=shopcart.serialize(), headers = self.headers)
+        self.app.post(BASE_URL, json=shopcart.serialize(), headers = self.headers)
         products = self._create_products(1, shopcart.user_id)
         product = products[0]
         resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers = self.headers)
@@ -400,15 +400,15 @@ class TestYourResourceServer(TestCase):
 
     # def test_create_shopcart_no_content_type(self):
     #     """It should not Create a Shopcart with no content type"""
-    #     response = self.app.post("/shopcarts")
+    #     response = self.app.post(BASE_URL)
     #     self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     # def test_create_shopcart_wrong_content_type(self):
     #     """It should not Create a Shopcart with wrong content type"""
-    #     response = self.app.post("/shopcarts", headers={"Content-Type": "application/haha"})
+    #     response = self.app.post(BASE_URL, headers={"Content-Type": "application/haha"})
     #     self.assertEqual(response.status_code, status.HTTP_415_UNSUPPORTED_MEDIA_TYPE)
 
     def test_unsupported_method(self):
         """It should not alloww unsupported methods"""
-        response = self.app.put("/shopcarts")
+        response = self.app.put(BASE_URL)
         self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

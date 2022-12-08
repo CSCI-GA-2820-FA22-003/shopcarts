@@ -26,7 +26,7 @@ def health():
 ######################################################################
 # Configure the Root route before OpenAPI
 ######################################################################
-@app.route("/app")
+@app.route("/")
 def index():
     """ Root URL response """
     return app.send_static_file("index.html")
@@ -130,7 +130,7 @@ class ShopcartResource(Resource):
     @api.response(400, 'The posted Shopcart data was not valid')
     @api.expect(product_model)
     @api.marshal_with(product_model)
-    @token_required
+    # @token_required
     def put(self, user_id):
         """Update items in shopcart
         Args:
@@ -164,7 +164,7 @@ class ShopcartResource(Resource):
     @api.doc('delete_shopcart', security='apikey')
     @api.response(404, 'Shopcart not found')
     @api.response(204, 'Shopcart deleted')
-    @token_required
+    # @token_required
     def delete(self, user_id):
         """Deletes a shopcart
             Args:
@@ -205,7 +205,7 @@ class ShopcartCollection(Resource):
     @api.response(400, 'The posted data was not valid')
     @api.expect(shopcart_model)
     @api.marshal_with(shopcart_model, code=201)
-    @token_required
+    # @token_required
     def post(self):
         """Creates a new shopcart and stores it in the database
         Args:
