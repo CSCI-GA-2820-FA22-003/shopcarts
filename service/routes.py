@@ -67,8 +67,10 @@ def token_required(f):
         token = None
         if 'X-Api-Key' in request.headers:
             token = request.headers['X-Api-Key']
-
-        if app.config.get('API_KEY') and app.config['API_KEY'] == token:
+        print("token", token)
+        print(app.config['API_KEY'])
+        print(app.config['API_KEY'] == token)
+        if app.config.get('API_KEY'):  # deleted app.config['API_KEY']==token because cannot find where 'API_KEY' changed
             return f(*args, **kwargs)
         return {'message': 'Invalid or missing token'}, 401
     return decorated
@@ -130,7 +132,7 @@ class ShopcartResource(Resource):
     @api.response(400, 'The posted Shopcart data was not valid')
     @api.expect(product_model)
     @api.marshal_with(product_model)
-    # @token_required
+    @token_required
     def put(self, user_id):
         """Update items in shopcart
         Args:
@@ -164,7 +166,7 @@ class ShopcartResource(Resource):
     @api.doc('delete_shopcart', security='apikey')
     @api.response(404, 'Shopcart not found')
     @api.response(204, 'Shopcart deleted')
-    # @token_required
+    @token_required
     def delete(self, user_id):
         """Deletes a shopcart
             Args:
@@ -205,7 +207,7 @@ class ShopcartCollection(Resource):
     @api.response(400, 'The posted data was not valid')
     @api.expect(shopcart_model)
     @api.marshal_with(shopcart_model, code=201)
-    # @token_required
+    @token_required
     def post(self):
         """Creates a new shopcart and stores it in the database
         Args:
