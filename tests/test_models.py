@@ -270,9 +270,9 @@ class TestProductsModel(unittest.TestCase):
         product = Products(user_id=shopcart.user_id, product_id="3", name="Melon",
                            price=6, time=date(2011, 1, 2), quantity=1)
         product.create()
-        found_product1 = Products.find_product(shopcart.user_id, float("inf"), -float("inf")).all()
-        found_product2 = Products.find_product(shopcart.user_id, 3, 1).all()
-        found_product3 = Products.find_product(shopcart.user_id, 5, 3).all()
+        found_product1 = Products.find_product_with_range(shopcart.user_id, float("inf"), -float("inf")).all()
+        found_product2 = Products.find_product_with_range(shopcart.user_id, 3, 1).all()
+        found_product3 = Products.find_product_with_range(shopcart.user_id, 5, 3).all()
         self.assertEqual(len(found_product1), 3)
         self.assertEqual(len(found_product2), 1)
         self.assertEqual(len(found_product3), 1)

@@ -412,8 +412,8 @@ $(function () {
             let ajax = $.ajax({
                 type: "GET",
                 url: `${PREFIX}/shopcarts/${user_id}/items?max-price=${max_price}&min-price=${min_price}`,
-                contentType: "application/json",
-                data: ''
+                // contentType: "application/json",
+                // data: ''
             })
     
             ajax.done(function(res){

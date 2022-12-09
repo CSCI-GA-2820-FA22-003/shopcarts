@@ -323,7 +323,7 @@ class Products(db.Model):
         return cls.query.filter(cls.user_id == user_id)
 
     @classmethod
-    def find_product(cls, user_id, max_price, min_price):
+    def find_product_with_range(cls, user_id, max_price, min_price):
         """Returns all Products with the given query parameter
 
         Args:
@@ -337,4 +337,11 @@ class Products(db.Model):
         return cls.query.filter(and_(cls.user_id == user_id,
                                 cls.price <= max_price, cls.price >= min_price))
     
-    
+    @classmethod
+    def find_product(cls, user_id):
+        """Returns all Products with the given query parameter
+
+        """
+        query_info = f"user id: {user_id}"
+        logger.info("Processing product query for %s ...", query_info)
+        return cls.query.filter(and_(cls.user_id == user_id))

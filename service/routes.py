@@ -53,8 +53,8 @@ shopcart_model = api.model('Shopcart', {
 
 # query string arguments
 product_args = reqparse.RequestParser()
-product_args.add_argument('max-price', type=float, required=False, help='List products by max-price')
-product_args.add_argument('min-price', type=float, required=False, help='List products by min-price')
+product_args.add_argument('max-price', type=str, required=False, help='List products by max-price')
+product_args.add_argument('min-price', type=str, required=False, help='List products by min-price')
 
 
 ######################################################################
@@ -369,7 +369,7 @@ class ProductResource(Resource):
 ######################################################################
 #  PATH: /shopcart/{user_id}/items
 ######################################################################
-@api.route('/shopcarts/<user_id>/items')
+@api.route('/shopcarts/<user_id>/items', strict_slashes=False)
 @api.param('user_id', 'The shopcart identifier')
 class ItemsResource(Resource):
     """
@@ -383,9 +383,9 @@ class ItemsResource(Resource):
     # READ A Product
     ######################################################################
     @api.doc('get_product')
-    @api.response(404, 'Product not found')
-    @api.expect(product_args, validate=True, required=False)
-    @api.marshal_with(product_model)
+    # @api.response(404, 'Product not found')
+    @api.expect(product_args, validate=True)
+    # @api.marshal_with(product_model)
     def get(self, user_id):
         """Read all products in the shopcart
         Args:
@@ -393,18 +393,28 @@ class ItemsResource(Resource):
         Returns:
             list: the list of products in the shopcart
         """
-        print("READ A Product")
-        args = product_args.parse_args()
-        print("args A Product")
-        if args['max-price']:
-            max_price = args['max-price']
-        if args['min-price']:
-            min_price = args['min-price']
         shopcarts = Shopcarts.find_by_user_id(user_id).all()
         if len(shopcarts) == 0:
             abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
-        app.logger.info(f"Read all products in the shopcart {user_id}")
-        products = Products.find_product(user_id, max_price, min_price).all()
+        app.logger.info(f"Read products in the shopcart {user_id}")
+        print(product_args)
+        try:
+            print('start')
+            args = product_args.parse_args()
+
+            print(args)
+            if args['max-price']:
+                max_price = args['max-price']
+                app.logger.info(f"Have max-price {max_price}")
+            if args['min-price']:
+                min_price = args['min-price']
+                app.logger.info(f"Have min-price {min_price}")
+            print(max_price)
+            print(min_price)
+            products = Products.find_product_with_range(user_id, max_price, min_price).all()
+        except Exception as e: 
+            app.logger.info(e)
+            products = Products.find_product(user_id).all()
 
         # Return the list of products
         app.logger.info("Returning products")
@@ -416,28 +426,28 @@ class ItemsResource(Resource):
     ######################################################################
     # READ A Product
     ######################################################################
-    @api.doc('get_product')
-    @api.response(404, 'Product not found')
-    @api.marshal_with(product_model)
-    def get(self, user_id):
-        """Read all products in the shopcart
-        Args:
-            user_id (str): the user_id of the shopcart
-        Returns:
-            list: the list of products in the shopcart
-        """
-        shopcarts = Shopcarts.find_by_user_id(user_id).all()
-        if len(shopcarts) == 0:
-            abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
-        app.logger.info(f"Read all products in the shopcart {user_id}")
-        products = Products.find_product(user_id,0,1).all()
+    # @api.doc('get_product')
+    # @api.response(404, 'Product not found')
+    # @api.marshal_with(product_model)
+    # def get(self, user_id):
+    #     """Read all products in the shopcart
+    #     Args:
+    #         user_id (str): the user_id of the shopcart
+    #     Returns:
+    #         list: the list of products in the shopcart
+    #     """
+    #     shopcarts = Shopcarts.find_by_user_id(user_id).all()
+    #     if len(shopcarts) == 0:
+    #         abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
+    #     app.logger.info(f"Read all products in the shopcart {user_id}")
+    #     products = Products.find_product(user_id).all()
 
-        # Return the list of products
-        app.logger.info("Returning products")
-        serialized_products = []
-        for product in products:
-            serialized_products.append(product.serialize())
-        return serialized_products, status.HTTP_200_OK
+    #     # Return the list of products
+    #     app.logger.info("Returning products")
+    #     serialized_products = []
+    #     for product in products:
+    #         serialized_products.append(product.serialize())
+    #     return serialized_products, status.HTTP_200_OK
 
     ######################################################################
     # Add A Product
