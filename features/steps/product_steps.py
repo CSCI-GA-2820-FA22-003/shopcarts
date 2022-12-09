@@ -49,8 +49,7 @@ def step_impl(context):
             "price": row['price'],
             "time": row['time']
         }
-        app_endpoint = f"{context.BASE_URL}/shopcarts"
-        product_endpoint = app_endpoint + f"/{row['user_id']}/items"
+        product_endpoint = rest_endpoint + f"/{row['user_id']}/items"
         context.resp = requests.post(product_endpoint, json=payload, headers=headers)
         expect(context.resp.status_code).to_equal(201)
         

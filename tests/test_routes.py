@@ -100,7 +100,7 @@ class TestYourResourceServer(TestCase):
             test_product = ProductsFactory()
             test_product.user_id = user_id
             test_product.product_id = str(i)
-            response = self.app.post(f"/shopcarts/{user_id}/items", json=test_product.serialize(), headers=self.headers)
+            response = self.app.post(f"{BASE_URL}/{user_id}/items", json=test_product.serialize(), headers=self.headers)
             self.assertEqual(
                 response.status_code, status.HTTP_201_CREATED, "Could not create test product"
             )
@@ -179,7 +179,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
         # get updated shopcart items
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items")
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items")
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         newdata = resp.get_json()
 
@@ -203,7 +203,7 @@ class TestYourResourceServer(TestCase):
         self.app.post(BASE_URL, json=shopcart.serialize(), headers=self.headers)
         products = self._create_products(1, shopcart.user_id)
         product = products[0]
-        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+        resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 1)
         resp = self.app.delete(f"{BASE_URL}/{shopcart.user_id}", headers=self.headers)
@@ -222,14 +222,14 @@ class TestYourResourceServer(TestCase):
         self.app.post(BASE_URL, json=shopcart.serialize(), headers=self.headers)
         products = self._create_products(5, shopcart.user_id)
         for product in products:
-            resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+            resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
             self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}+10/items")
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}+10/items")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_get_shopcart_not_found(self):
         """It should not Get a Shopcart thats not found"""
-        response = self.app.get("/shopcarts/0")
+        response = self.app.get("{BASE_URL}/0")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         data = response.get_json()
         logging.debug("Response data = %s", data)
@@ -253,7 +253,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data["user_id"], shopcart.user_id)
         products = self._create_products(5, shopcart.user_id)
         for product in products:
-            resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+            resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
             data = resp.get_json()
             self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
             self.assertEqual(data["user_id"], product.user_id)
@@ -267,9 +267,9 @@ class TestYourResourceServer(TestCase):
         self.app.post(BASE_URL, json=shopcart.serialize(), headers=self.headers)
         products = self._create_products(5, shopcart.user_id)
         for product in products:
-            resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+            resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
             self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-            resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}")
+            resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items/{product.product_id}")
             self.assertEqual(resp.status_code, status.HTTP_200_OK)
             data = resp.get_json()
             self.assertEqual(data["user_id"], product.user_id)
@@ -281,7 +281,7 @@ class TestYourResourceServer(TestCase):
         shopcart = ShopcartsFactory()
         logging.debug("Test Shopcart: %s", shopcart.serialize())
         self.app.post(BASE_URL, json=shopcart.serialize(), headers=self.headers)
-        response = self.app.get(f"/shopcarts/{shopcart.user_id}/items/0")
+        response = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items/0")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         data = response.get_json()
         logging.debug("Response data = %s", data)
@@ -294,9 +294,9 @@ class TestYourResourceServer(TestCase):
         self.app.post(BASE_URL, json=shopcart.serialize(), headers=self.headers)
         products = self._create_products(5, shopcart.user_id)
         for product in products:
-            resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+            resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
             self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items")
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items")
         data = resp.get_json()
         self.assertEqual(len(data), 5)
 
@@ -306,11 +306,11 @@ class TestYourResourceServer(TestCase):
         self.app.post(BASE_URL, json=shopcart.serialize(), headers=self.headers)
         products = self._create_products(1, shopcart.user_id)
         product = products[0]
-        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+        resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         new_product = Products(user_id=product.user_id, product_id=product.product_id, price=15.0,
                                time=date.today(), quantity=16.0, name="new")
-        resp = self.app.put(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}",
+        resp = self.app.put(f"{BASE_URL}/{shopcart.user_id}/items/{product.product_id}",
                             json=new_product.serialize(), headers=self.headers)
         data = resp.get_json()
         self.assertEqual(data["user_id"], new_product.user_id)
@@ -321,7 +321,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(data["price"], new_product.price)
         # Fetch it back
         logging.debug("Test Shopcart: %s", shopcart.serialize())
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}",
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items/{product.product_id}",
                             json=new_product.serialize(), headers=self.headers)
         data = resp.get_json()
         self.assertEqual(data["user_id"], new_product.user_id)
@@ -337,13 +337,13 @@ class TestYourResourceServer(TestCase):
         self.app.post(BASE_URL, json=shopcart.serialize(), headers=self.headers)
         products = self._create_products(1, shopcart.user_id)
         product = products[0]
-        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+        resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 1)
-        resp = self.app.delete(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}")
+        resp = self.app.delete(f"{BASE_URL}/{shopcart.user_id}/items/{product.product_id}")
         self.assertEqual(len(Products.all()), 0)
         # make sure the product is deleted
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items/{product.product_id}")
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items/{product.product_id}")
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_products(self):
@@ -352,24 +352,24 @@ class TestYourResourceServer(TestCase):
         self.app.post(BASE_URL, json=shopcart.serialize(), headers=self.headers)
         product = Products(user_id=shopcart.user_id, product_id="1", name="Pen",
                            price=4, time=date(2011, 1, 2), quantity=1)
-        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+        resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 1)
         product = Products(user_id=shopcart.user_id, product_id="2", name="Pencil",
                            price=2, time=date(2011, 1, 2), quantity=1)
-        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+        resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 2)
         product = Products(user_id=shopcart.user_id, product_id="3", name="Melon",
                            price=6, time=date(2011, 1, 2), quantity=1)
-        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+        resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 3)
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items")
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items")
         self.assertEqual(len(resp.get_json()), 3)
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items?max-price=9&min-price=5")
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items?max-price=9&min-price=5")
         self.assertEqual(len(resp.get_json()), 1)
-        resp = self.app.get(f"/shopcarts/{shopcart.user_id}/items?max-price=5&min-price=1")
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items?max-price=5&min-price=1")
         self.assertEqual(len(resp.get_json()), 2)
 
     def test_empty_shopcarts(self):
@@ -379,10 +379,10 @@ class TestYourResourceServer(TestCase):
         self.app.post(BASE_URL, json=shopcart.serialize(), headers=self.headers)
         products = self._create_products(1, shopcart.user_id)
         product = products[0]
-        resp = self.app.post(f"/shopcarts/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+        resp = self.app.post(f"{BASE_URL}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 1)
-        resp = self.app.put(f"/shopcarts/{shopcart.user_id}/empty")
+        resp = self.app.put(f"{BASE_URL}/{shopcart.user_id}/empty")
         self.assertEqual(resp.get_json()["products"], [])
         self.assertEqual(len(Products.all()), 0)
         # make sure shopcart is deleted

@@ -61,7 +61,7 @@ $(function () {
         }else{
             let ajax = $.ajax({
                 type: "POST",
-                url: `/shopcarts/${UserID}/items`,
+                url: `${PREFIX}/shopcarts/${UserID}/items`,
                 contentType: "application/json",
                 data: JSON.stringify(data),
             });
@@ -105,7 +105,7 @@ $(function () {
 
         let ajax = $.ajax({
                 type: "PUT",
-                url: `/shopcarts/${UserID}/items/${productID}`,
+                url: `${PREFIX}/shopcarts/${UserID}/items/${productID}`,
                 contentType: "application/json",
                 data: JSON.stringify(data)
             })
@@ -226,7 +226,7 @@ $(function () {
         }else{
             let ajax = $.ajax({
                 type: "GET",
-                url: `/shopcarts/${user_id}/items/${product_id}`,
+                url: `${PREFIX}/shopcarts/${user_id}/items/${product_id}`,
                 contentType: "application/json",
                 data: ''
             })
@@ -259,7 +259,7 @@ $(function () {
         }else{
             let ajax = $.ajax({
                 type: "DELETE",
-                url: `/shopcarts/${user_id}/items/${product_id}`,
+                url: `${PREFIX}/shopcarts/${user_id}/items/${product_id}`,
                 contentType: "application/json",
                 data: '',
             })
@@ -324,7 +324,7 @@ $(function () {
 
         let ajax = $.ajax({
             type: "GET",
-            url: `/shopcarts/${user_id}/items`,
+            url: `${PREFIX}/shopcarts/${user_id}/items`,
             contentType: "application/json",
             data: ''
         })
@@ -379,7 +379,7 @@ $(function () {
         }else{
             let ajax = $.ajax({
                 type: "PUT",
-                url: `/shopcarts/${user_id}/empty`,
+                url: `${PREFIX}/shopcarts/${user_id}/empty`,
                 contentType: "application/json",
                 data: '',
             })
@@ -411,7 +411,7 @@ $(function () {
         }else{
             let ajax = $.ajax({
                 type: "GET",
-                url: `/shopcarts/${user_id}/items?max-price=${max_price}&min-price=${min_price}`,
+                url: `${PREFIX}/shopcarts/${user_id}/items?max-price=${max_price}&min-price=${min_price}`,
                 contentType: "application/json",
                 data: ''
             })

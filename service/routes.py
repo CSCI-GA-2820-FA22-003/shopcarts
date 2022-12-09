@@ -6,7 +6,7 @@ Describe what your service does here
 # pylint: disable=cyclic-import
 import secrets
 from functools import wraps
-from flask import jsonify, request, url_for, abort
+from flask import jsonify, request, abort
 from flask_restx import fields, reqparse, Resource
 from service.models import Products, Shopcarts
 from .common import status  # HTTP Status Codes
@@ -52,10 +52,9 @@ shopcart_model = api.model('Shopcart', {
 })
 
 # query string arguments
-records_args = reqparse.RequestParser()
-records_args.add_argument('user_id', type=str, required=False, help='List records by user_id')
-records_args.add_argument('product_id', type=str, required=False, help='List records by product_id')
-records_args.add_argument('name', type=str, required=False, help='List records by name')
+product_args = reqparse.RequestParser()
+product_args.add_argument('max-price', type=float, required=False, help='List products by max-price')
+product_args.add_argument('min-price', type=float, required=False, help='List products by min-price')
 
 
 ######################################################################
@@ -263,177 +262,252 @@ class ShopcartCollection(Resource):
         app.logger.info("Returning %d shopcarts", len(results))
         return results, status.HTTP_200_OK
 
-
-#######################################################################
-# REST API
-#######################################################################
-
 ######################################################################
-# ADD A PRODUCT
+#  PATH: /shopcart/{user_id}/items/{product_id} 
 ######################################################################
-
-
-@app.route("/shopcarts/<user_id>/items", methods=["POST"])
-def add_a_product(user_id):
-    """Add a product to the shopcart
-    Args:
-        user_id (str): the user_id of the shopcart
-    Returns:
-        dict: the added product
+@api.route('/shopcarts/<user_id>/items/<product_id>')
+@api.param('user_id', 'The shopcart identifier')
+@api.param('product_id', 'The product_id identifier')
+class ProductResource(Resource):
     """
-    app.logger.info("Add a product into the shopcart")
-    product = Products()
-    check_content_type("application/json")
-    product.deserialize(request.get_json())
-    product.create()
-    app.logger.info(f"Product {product.product_id} created in shopcart {user_id}")
+    ProductResource class
 
-    # Set the location header and return the new product
-    location_url = url_for("read_a_product", user_id=user_id,
-                           product_id=product.product_id, _external=True)
-    return (
-        jsonify(product.serialize()),
-        status.HTTP_201_CREATED,
-        {"Location": location_url},
-    )
-
-######################################################################
-# READ A PRODUCT
-######################################################################
-
-
-@app.route("/shopcarts/<user_id>/items/<product_id>", methods=["GET"])
-def read_a_product(user_id, product_id):
-    """Read a product in the shopcart
-    Args:
-        user_id (str): the user_id of the shopcart
-        product_id (str): the product_id of the product
-    Returns:
-        dict: the product
+    Allows the manipulation of a single shopcart
+    GET /shopcart/{user_id}/items/{product_id} - Returns a product with the user id and product id
+    PUT /shopcart/{user_id}/items/{product_id} - Update a product with the user id and product id
+    DELETE /shopcart/{user_id}/items/{product_id} -  Deletes a product with the user id and product id
     """
-    app.logger.info(f"Read a product {product_id} in the shopcart {user_id}")
-    products = Products.find_by_user_id_product_id(user_id, product_id).all()
 
-    if len(products) == 0:
-        abort(status.HTTP_404_NOT_FOUND,
-              f"Product with id {product_id} was not found in shopcart {user_id}.")
+    ######################################################################
+    # READ A Product
+    ######################################################################
+    @api.doc('get_product')
+    @api.response(404, 'Product not found')
+    @api.marshal_with(product_model)
+    def get(self, user_id, product_id):
+        """Read a product in the shopcart
+        Args:
+            user_id (str): the user_id of the shopcart
+            product_id (str): the product_id of the product
+        Returns:
+            dict: the product
+        """
+        app.logger.info(f"Read a product {product_id} in the shopcart {user_id}")
+        products = Products.find_by_user_id_product_id(user_id, product_id).all()
 
-    # Return the new shopcart
-    app.logger.info("Returning product: %s", product_id)
-    return jsonify(products[0].serialize()), status.HTTP_200_OK
+        if len(products) == 0:
+            abort(status.HTTP_404_NOT_FOUND,
+                f"Product with id {product_id} was not found in shopcart {user_id}.")
 
-######################################################################
-# LIST ALL PRODUCTS
-######################################################################
+        # Return the new shopcart
+        app.logger.info("Returning product: %s", product_id)
+        return products[0].serialize(), status.HTTP_200_OK
 
+    ######################################################################
+    # UPDATE A Product
+    ######################################################################
+    @api.doc('update_product', security='apikey')
+    @api.response(404, 'Product not found')
+    @api.response(400, 'The posted Product data was not valid')
+    @api.expect(product_model)
+    @api.marshal_with(product_model)
+    @token_required
+    def put(self, user_id, product_id):
+        """Update a product in the shopcart
+        Args:
+            user_id (str): the user_id of the shopcart
+            product_id (str): the product_id of the product
+        Returns:
+            dict: the product
+        """
+        app.logger.info(f"Read a product {product_id} in the shopcart {user_id}")
+        products = Products.find_by_user_id_product_id(user_id, product_id).all()
 
-@app.route("/shopcarts/<user_id>/items", methods=["GET"])
-def list_all_products(user_id):
-    """Read all products in the shopcart
-    Args:
-        user_id (str): the user_id of the shopcart
-    Returns:
-        list: the list of products in the shopcart
-    """
-    args = request.args
-    max_price = args.get("max-price", default=float('inf'), type=float)
-    min_price = args.get("min-price", default=-float('inf'), type=float)
-    shopcarts = Shopcarts.find_by_user_id(user_id).all()
-    if len(shopcarts) == 0:
-        abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
-    app.logger.info(f"Read all products in the shopcart {user_id}")
-    products = Products.find_product(user_id, max_price, min_price).all()
+        if len(products) == 0:
+            abort(status.HTTP_404_NOT_FOUND,
+                f"Product with id {product_id} was not found in shopcart {user_id}.")
 
-    # Return the list of products
-    app.logger.info("Returning products")
-    serialized_products = []
-    for product in products:
-        serialized_products.append(product.serialize())
-    return jsonify(serialized_products), status.HTTP_200_OK
-
-######################################################################
-# UPDATE A PRODUCT
-######################################################################
-
-
-@app.route("/shopcarts/<user_id>/items/<product_id>", methods=["PUT"])
-def update_a_product(user_id, product_id):
-    """Update a product in the shopcart
-    Args:
-        user_id (str): the user_id of the shopcart
-        product_id (str): the product_id of the product
-    Returns:
-        dict: the product
-    """
-    app.logger.info(f"Read a product {product_id} in the shopcart {user_id}")
-    products = Products.find_by_user_id_product_id(user_id, product_id).all()
-
-    if len(products) == 0:
-        abort(status.HTTP_404_NOT_FOUND,
-              f"Product with id {product_id} was not found in shopcart {user_id}.")
-
-    # Return the list of products
-    app.logger.info("Updating product")
-    originial_id = products[0].id
-    product = products[0]
-    product.deserialize(request.get_json())
-    product.id = originial_id
-    product.update()
-
-    app.logger.info("Product %s in shopcart %s was updated.", product_id, user_id)
-    return jsonify(product.serialize()), status.HTTP_200_OK
-
-######################################################################
-# DELETE A PRODUCT
-######################################################################
-
-
-@app.route("/shopcarts/<user_id>/items/<product_id>", methods=["DELETE"])
-def delete_a_product(user_id, product_id):
-    """Update a product in the shopcart
-    Args:
-        user_id (str): the user_id of the shopcart
-        product_id (str): the product_id of the product
-    Returns:
-        str: always returns an empty string
-    """
-    app.logger.info(f"Delete a product {product_id} in the shopcart {user_id}")
-    products = Products.find_by_user_id_product_id(user_id, product_id).all()
-
-    app.logger.info("Deleting product")
-    if len(products) != 0:
         # Return the list of products
+        app.logger.info("Updating product")
+        originial_id = products[0].id
         product = products[0]
-        product.delete()
+        product.deserialize(api.payload)
+        product.id = originial_id
+        product.update()
 
-    app.logger.info("Product %s in shopcart %s was deleted.", product_id, user_id)
-    return "", status.HTTP_204_NO_CONTENT
+        app.logger.info("Product %s in shopcart %s was updated.", product_id, user_id)
+        return product.serialize(), status.HTTP_200_OK
+
+    ######################################################################
+    # DELETE A Product
+    ######################################################################
+    @api.doc('delete_product', security='apikey')
+    @api.response(404, 'Product not found')
+    @api.response(204, 'Product deleted')
+    @token_required
+    def delete(self, user_id, product_id):
+        """Update a product in the shopcart
+        Args:
+            user_id (str): the user_id of the shopcart
+            product_id (str): the product_id of the product
+        Returns:
+            str: always returns an empty string
+        """
+        app.logger.info(f"Delete a product {product_id} in the shopcart {user_id}")
+        products = Products.find_by_user_id_product_id(user_id, product_id).all()
+
+        app.logger.info("Deleting product")
+        if len(products) != 0:
+            # Return the list of products
+            product = products[0]
+            product.delete()
+
+        app.logger.info("Product %s in shopcart %s was deleted.", product_id, user_id)
+        return "", status.HTTP_204_NO_CONTENT
+
 
 ######################################################################
-# EMPTY A SHOPCART
+#  PATH: /shopcart/{user_id}/items
 ######################################################################
-
-
-@app.route("/shopcarts/<user_id>/empty", methods=["PUT"])
-def empty_shopcarts(user_id):
-    """Empty a shopcart
-    Args:
-        user_id (str): the user_id of the shopcart
-    Returns:
-        dict: the emptied shopcart
+@api.route('/shopcarts/<user_id>/items')
+@api.param('user_id', 'The shopcart identifier')
+class ItemsResource(Resource):
     """
-    app.logger.info(f"Request to Reset shopcart {user_id}...")
+    ItemsResource class
 
-    # Get the current shopcart
-    shopcarts = Shopcarts.find_by_user_id(user_id).all()
-    if shopcarts is None:
-        abort(status.HTTP_404_NOT_FOUND, f"Shopcart {user_id} does not exist")
+    Allows the manipulation of a single shopcart
+    GET /shopcart{user_id} - Get all products with the user id
+    POST /shopcart{user_id} - Add a product with the user id
+    """
+    ######################################################################
+    # READ A Product
+    ######################################################################
+    @api.doc('get_product')
+    @api.response(404, 'Product not found')
+    @api.expect(product_args, validate=True, required=False)
+    @api.marshal_with(product_model)
+    def get(self, user_id):
+        """Read all products in the shopcart
+        Args:
+            user_id (str): the user_id of the shopcart
+        Returns:
+            list: the list of products in the shopcart
+        """
+        print("READ A Product")
+        args = product_args.parse_args()
+        print("args A Product")
+        if args['max-price']:
+            max_price = args['max-price']
+        if args['min-price']:
+            min_price = args['min-price']
+        shopcarts = Shopcarts.find_by_user_id(user_id).all()
+        if len(shopcarts) == 0:
+            abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
+        app.logger.info(f"Read all products in the shopcart {user_id}")
+        products = Products.find_product(user_id, max_price, min_price).all()
 
-    # empty the shopcart
-    shopcart = shopcarts[0]
-    shopcart.empty()
+        # Return the list of products
+        app.logger.info("Returning products")
+        serialized_products = []
+        for product in products:
+            serialized_products.append(product.serialize())
+        return serialized_products, status.HTTP_200_OK
 
-    return jsonify(shopcart.serialize())
+    ######################################################################
+    # READ A Product
+    ######################################################################
+    @api.doc('get_product')
+    @api.response(404, 'Product not found')
+    @api.marshal_with(product_model)
+    def get(self, user_id):
+        """Read all products in the shopcart
+        Args:
+            user_id (str): the user_id of the shopcart
+        Returns:
+            list: the list of products in the shopcart
+        """
+        shopcarts = Shopcarts.find_by_user_id(user_id).all()
+        if len(shopcarts) == 0:
+            abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
+        app.logger.info(f"Read all products in the shopcart {user_id}")
+        products = Products.find_product(user_id,0,1).all()
+
+        # Return the list of products
+        app.logger.info("Returning products")
+        serialized_products = []
+        for product in products:
+            serialized_products.append(product.serialize())
+        return serialized_products, status.HTTP_200_OK
+
+    ######################################################################
+    # Add A Product
+    ######################################################################
+    @api.doc('add_product', security='apikey')
+    @api.response(400, 'The posted data was not valid')
+    @api.expect(product_model)
+    @api.marshal_with(product_model, code=201)
+    @token_required
+    def post(self, user_id):
+        """
+        Add a product to the shopcart
+        Args:
+            user_id (str): the user_id of the shopcart
+        Returns:
+            dict: the added product
+        """
+        app.logger.info("Add a product into the shopcart")
+        product = Products()
+        check_content_type("application/json")
+        product.deserialize(request.get_json())
+        product.create()
+        app.logger.info(f"Product {product.product_id} created in shopcart {user_id}")
+
+        # Set the location header and return the new product
+        location_url = api.url_for(ProductResource, user_id=user_id,
+                            product_id=product.product_id, _external=True)
+        return (
+            product.serialize(),
+            status.HTTP_201_CREATED,
+            {"Location": location_url},
+        )
+
+######################################################################
+#  PATH: /shopcart/{user_id}/empty 
+######################################################################
+@api.route('/shopcarts/<user_id>/empty')
+@api.param('user_id', 'The shopcart identifier')
+class EmptyResource(Resource):
+    """
+    EmptyResource class
+
+    Allows the manipulation of a single shopcart
+    PUT /shopcart/{user_id}/empty - Empty a shopcart with the user id
+    """
+    ######################################################################
+    # READ A Product
+    ######################################################################
+    @api.doc('empty_a_shopcart')
+    @api.response(404, 'User_id not found')
+    def put(self, user_id):
+        """Empty a shopcart
+        Args:
+            user_id (str): the user_id of the shopcart
+        Returns:
+            dict: the emptied shopcart
+        """
+        app.logger.info(f"Request to Reset shopcart {user_id}...")
+
+        # Get the current shopcart
+        shopcarts = Shopcarts.find_by_user_id(user_id).all()
+        if shopcarts is None:
+            abort(status.HTTP_404_NOT_FOUND, f"Shopcart {user_id} does not exist")
+
+        # empty the shopcart
+        shopcart = shopcarts[0]
+        shopcart.empty()
+
+        return shopcart.serialize()
+
 
 ######################################################################
 #  U T I L I T Y   F U N C T I O N S
