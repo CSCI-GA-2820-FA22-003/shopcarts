@@ -27,7 +27,7 @@ jobs:
           POSTGRES_PASSWORD: pgs3cr3t
           POSTGRES_DB: testdb
         ports:
-          - 5433:5433
+          - 5432:5432
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -53,7 +53,9 @@ jobs:
           curl -i http://localhost:8080/health
           echo "\n*** SERVER IS RUNNING ***"
         env:
-          DATABASE_URI: "postgresql://postgres:pgs3cr3t@postgres:5433/testdb"
+          DATABASE_URI: "postgresql://postgres:pgs3cr3t@postgres:5432/testdb"
 
       - name: Run Integration Tests
-        run: behave
+        run: 
+          sudo service postgresql start
+          behave
