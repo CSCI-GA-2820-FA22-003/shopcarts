@@ -336,7 +336,7 @@ class Products(db.Model):
         logger.info("Processing product query for %s ...", query_info)
         return cls.query.filter(and_(cls.user_id == user_id,
                                 cls.price <= max_price, cls.price >= min_price))
-    
+
     @classmethod
     def find_product(cls, user_id):
         """Returns all Products with the given query parameter

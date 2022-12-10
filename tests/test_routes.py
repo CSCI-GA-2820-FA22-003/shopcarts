@@ -367,7 +367,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(len(Products.all()), 3)
         resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items")
         self.assertEqual(len(resp.get_json()), 3)
-        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items", query_string="min-price=5.0")
+        resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items?max-price=9&min-price=5")
         self.assertEqual(len(resp.get_json()), 1)
         resp = self.app.get(f"{BASE_URL}/{shopcart.user_id}/items?max-price=5&min-price=1")
         self.assertEqual(len(resp.get_json()), 2)
