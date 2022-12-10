@@ -56,6 +56,4 @@ jobs:
           DATABASE_URI: "postgresql://postgres:pgs3cr3t@postgres:5432/testdb"
 
       - name: Run Integration Tests
-        run: 
-          sudo service postgresql start
-          behave
+        run: behave
