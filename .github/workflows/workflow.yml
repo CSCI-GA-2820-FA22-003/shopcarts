@@ -19,8 +19,8 @@ jobs:
         # Docker Hub image
         image: postgres
         env:
-          POSTGRES_PASSWORD: pgs3cr3t
-          POSTGRES_DB: testdb
+          POSTGRES_PASSWORD: postgres
+          #POSTGRES_DB: testdb
         ports:
           - 5432:5432
         # Set health checks to wait until postgres has started
@@ -53,7 +53,7 @@ jobs:
       - name: Run unit tests with nose
         run: nosetests
         env:
-          DATABASE_URI: "postgresql://postgres:pgs3cr3t@postgres:5432/postgres"
+          DATABASE_URI: "postgresql://postgres:postgres@postgres:5432/postgres"
 
       # Uncomment the following 2 lines during hands-on lab
       

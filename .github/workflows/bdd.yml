@@ -2,14 +2,7 @@ name: BDD Tests
 on:
   push:
     branches:
-      - main
-    paths-ignore:
-    - 'README.md'
-    - '.vscode/**'
-    - '**.md'
-  pull_request:
-    branches:
-      - main
+      - '*'
     paths-ignore:
     - 'README.md'
     - '.vscode/**'
@@ -19,6 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: rofrano/pipeline-selenium:latest
+
     services:
       postgres:
         image: postgres
