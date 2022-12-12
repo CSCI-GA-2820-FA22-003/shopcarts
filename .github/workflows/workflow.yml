@@ -20,7 +20,7 @@ jobs:
         image: postgres
         env:
           POSTGRES_PASSWORD: pgs3cr3t
-          
+          POSTGRES_DB: testdb
         ports:
           - 5432:5432
         # Set health checks to wait until postgres has started
