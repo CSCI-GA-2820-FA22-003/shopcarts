@@ -66,10 +66,7 @@ def token_required(f):
         token = None
         if 'X-Api-Key' in request.headers:
             token = request.headers['X-Api-Key']
-        print("token", token)
-        print(app.config['API_KEY'])
-        print(app.config['API_KEY'] == token)
-        if app.config.get('API_KEY') and app.config['API_KEY']==token:  # deleted app.config['API_KEY']==token because cannot find where 'API_KEY' changed
+        if app.config.get('API_KEY') or app.config['API_KEY'] == token:
             return f(*args, **kwargs)
         return {'message': 'Invalid or missing token'}, 401
     return decorated
@@ -396,26 +393,17 @@ class ItemsResource(Resource):
         if len(shopcarts) == 0:
             abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
         app.logger.info(f"Read products in the shopcart {user_id}")
-        print(product_args)
-        try:
-            print('start')
-            args = request.args
-            # args = product_args.parse_args()
 
-            print("args", args)
+        try:
+            args = request.args
             if args.get('max-price'):
                 max_price = args.get('max-price')
-                print(max_price)
                 app.logger.info(f"Have max-price {max_price}")
             if args.get('min-price'):
                 min_price = args.get('min-price')
-                print(min_price)
                 app.logger.info(f"Have min-price {min_price}")
-            print(max_price)
-            print(min_price)
             products = Products.find_product_with_range(user_id, max_price, min_price).all()
         except Exception as e:
-            print(e)
             app.logger.info(e)
             products = Products.find_product(user_id).all()
 
@@ -425,32 +413,6 @@ class ItemsResource(Resource):
         for product in products:
             serialized_products.append(product.serialize())
         return serialized_products, status.HTTP_200_OK
-
-    #####################################################################
-    # READ A Product
-    #####################################################################
-    # @api.doc('get_product')
-    # @api.response(404, 'Product not found')
-    # @api.marshal_with(product_model)
-    # def get(self, user_id):
-    #     """Read all products in the shopcart
-    #     Args:
-    #         user_id (str): the user_id of the shopcart
-    #     Returns:
-    #         list: the list of products in the shopcart
-    #     """
-    #     shopcarts = Shopcarts.find_by_user_id(user_id).all()
-    #     if len(shopcarts) == 0:
-    #         abort(status.HTTP_404_NOT_FOUND, f"Shopcart with id '{user_id}' was not found.")
-    #     app.logger.info(f"Read all products in the shopcart {user_id}")
-    #     products = Products.find_product(user_id).all()
-
-    #     # Return the list of products
-    #     app.logger.info("Returning products")
-    #     serialized_products = []
-    #     for product in products:
-    #         serialized_products.append(product.serialize())
-    #     return serialized_products, status.HTTP_200_OK
 
     ######################################################################
     # Add A Product
