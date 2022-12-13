@@ -19,7 +19,7 @@ jobs:
         # Docker Hub image
         image: postgres
         env:
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: pgs3cr3t
           #POSTGRES_DB: testdb
         ports:
           - 5432:5432
