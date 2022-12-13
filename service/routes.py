@@ -447,7 +447,10 @@ class ItemsResource(Resource):
         app.logger.info("Add a product into the shopcart")
         product = Products()
         check_content_type("application/json")
-        product.deserialize(request.get_json())
+        product.deserialize(api.payload)
+        shopcarts = Shopcarts.find_by_user_id(product.user_id).all()
+        if len(shopcarts) == 0:
+            abort(status.HTTP_404_NOT_FOUND, f"Shopcart {product.user_id} does not exist")
         product.create()
         app.logger.info(f"Product {product.product_id} created in shopcart {user_id}")
 
@@ -473,7 +476,7 @@ class EmptyResource(Resource):
     PUT /shopcart/{user_id}/empty - Empty a shopcart with the user id
     """
     ######################################################################
-    # READ A Product
+    # Empty A Shopcart
     ######################################################################
     @api.doc('empty_a_shopcart')
     @api.response(404, 'User_id not found')
@@ -488,7 +491,7 @@ class EmptyResource(Resource):
 
         # Get the current shopcart
         shopcarts = Shopcarts.find_by_user_id(user_id).all()
-        if shopcarts is None:
+        if len(shopcarts) == 0:
             abort(status.HTTP_404_NOT_FOUND, f"Shopcart {user_id} does not exist")
 
         # empty the shopcart
