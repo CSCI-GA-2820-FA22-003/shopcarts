@@ -170,7 +170,7 @@ $(function () {
         })
 
         ajax.done(function(res){
-            //alert(res.toSource())
+            // console.log(res)
             $("#search_results").empty();
             if(res.length==0){
                 flash_message("No shopcart")
