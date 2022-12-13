@@ -340,10 +340,10 @@ class TestYourResourceServer(TestCase):
         resp = self.app.post(f"{BASE_URL_API}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 1)
-        resp = self.app.delete(f"{BASE_URL_API}/{shopcart.user_id}/items/{product.product_id}")
+        resp = self.app.delete(f"{BASE_URL_API}/{shopcart.user_id}/items/{product.product_id}", headers=self.headers)
         self.assertEqual(len(Products.all()), 0)
         # make sure the product is deleted
-        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items/{product.product_id}")
+        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items/{product.product_id}", headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_query_products(self):
@@ -388,7 +388,6 @@ class TestYourResourceServer(TestCase):
         # make sure shopcart is deleted
         resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}")
         data = resp.get_json()
-        print(data)
         self.assertEqual(data["products"], [])
 
     ######################################################################

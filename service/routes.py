@@ -69,7 +69,7 @@ def token_required(f):
         print("token", token)
         print(app.config['API_KEY'])
         print(app.config['API_KEY'] == token)
-        if app.config.get('API_KEY'):  # deleted app.config['API_KEY']==token because cannot find where 'API_KEY' changed
+        if app.config.get('API_KEY') and app.config['API_KEY']==token:  # deleted app.config['API_KEY']==token because cannot find where 'API_KEY' changed
             return f(*args, **kwargs)
         return {'message': 'Invalid or missing token'}, 401
     return decorated

@@ -1,8 +1,6 @@
 import requests
 from behave import given
 from compare import expect
-# from service import routes
-# headers = {'X-Api-Key': routes.generate_apikey()}
 
 @given('the following shopcarts')
 def step_impl(context):
