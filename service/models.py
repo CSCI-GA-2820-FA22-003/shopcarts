@@ -25,6 +25,10 @@ class DataValidationError(Exception):
     """ Used for an data validation errors when deserializing """
 
 
+class DatabaseConnectionError(Exception):
+    """Custom Exception when database connection fails"""
+
+
 class Shopcarts(db.Model):
     """
     Class that represents a Shopcart
@@ -42,6 +46,8 @@ class Shopcarts(db.Model):
         """
         Creates a Shopcart and add it to the database
         """
+        if self.user_id is None:  # user_id is the only required field
+            raise DataValidationError("user_id attribute is not set")
         logger.info("Creating %s", self.user_id)
         shopcarts = self.find_by_user_id(self.user_id)
         if len(shopcarts.all()) > 0:
@@ -317,7 +323,7 @@ class Products(db.Model):
         return cls.query.filter(cls.user_id == user_id)
 
     @classmethod
-    def find_product(cls, user_id, max_price, min_price):
+    def find_product_with_range(cls, user_id, max_price, min_price):
         """Returns all Products with the given query parameter
 
         Args:
@@ -330,3 +336,12 @@ class Products(db.Model):
         logger.info("Processing product query for %s ...", query_info)
         return cls.query.filter(and_(cls.user_id == user_id,
                                 cls.price <= max_price, cls.price >= min_price))
+
+    @classmethod
+    def find_product(cls, user_id):
+        """Returns all Products with the given query parameter
+
+        """
+        query_info = f"user id: {user_id}"
+        logger.info("Processing product query for %s ...", query_info)
+        return cls.query.filter(and_(cls.user_id == user_id))

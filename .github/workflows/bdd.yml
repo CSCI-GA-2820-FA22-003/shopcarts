@@ -19,7 +19,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container: rofrano/pipeline-selenium:latest
-
     services:
       postgres:
         image: postgres

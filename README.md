@@ -18,6 +18,19 @@
 
 - Run `make lint` to make sure that there is no Pylint error. 
 
+- Run the tests using `behave`
+
+  Start the server in a separate bash shell:
+
+  ```sh
+  honcho start
+  ```
+
+  Then start behave in your original bash shell:
+
+  ```sh
+  behave
+  ```
 ## Reminder: Whenever you make changes to the table schema. Run `flask create-db` to sync the database
 
 ## Run `flask run` to start the service. If you want to clean the database, run `flask create-db`.

@@ -94,7 +94,7 @@ Scenario: Delete a shopcart
     When I press the "Clear" button
     And I set the "User ID" to "1"
     And I press the "Read this" button
-    Then I should see the message "404 Not Found: Shopcart with id '1' was not found."
+    Then I should see the message "Shopcart with id '1' was not found."
 
 Scenario: Empty a shopcart
     When I visit the "home page"
