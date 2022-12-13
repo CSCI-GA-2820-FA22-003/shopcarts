@@ -1,8 +1,8 @@
 import requests
 from behave import given
 from compare import expect
-from service import routes
-headers = {'X-Api-Key': routes.generate_apikey()}
+# from service import routes
+# headers = {'X-Api-Key': routes.generate_apikey()}
 
 @given('the following shopcarts')
 def step_impl(context):
@@ -11,10 +11,10 @@ def step_impl(context):
 
     rest_endpoint = f"{context.BASE_URL}/api/shopcarts"
 
-    context.resp = requests.get(rest_endpoint, headers=headers)
+    context.resp = requests.get(rest_endpoint)
     expect(context.resp.status_code).to_equal(200)
     for shopcart in context.resp.json():
-        context.resp = requests.delete(f"{rest_endpoint}/{shopcart['user_id']}", headers = headers)
+        context.resp = requests.delete(f"{rest_endpoint}/{shopcart['user_id']}")
         expect(context.resp.status_code).to_equal(204)
 
     # load the database with new shopcarts
@@ -26,7 +26,7 @@ def step_impl(context):
             payload = {
                 "user_id": user_id
             }
-            context.resp = requests.post(rest_endpoint, json=payload, headers=headers)
+            context.resp = requests.post(rest_endpoint, json=payload)
             expect(context.resp.status_code).to_equal(201)
     for row in context.table:
         payload = {
@@ -38,6 +38,6 @@ def step_impl(context):
             "time": row['time']
         }
         product_endpoint = rest_endpoint + f"/{row['user_id']}/items"
-        context.resp = requests.post(product_endpoint, json=payload, headers=headers)
+        context.resp = requests.post(product_endpoint, json=payload)
         expect(context.resp.status_code).to_equal(201)
         
