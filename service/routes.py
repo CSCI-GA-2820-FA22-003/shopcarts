@@ -47,8 +47,7 @@ record_model = api.inherit(
     'RecordModel',
     product_model,
     {
-        'id': fields.Integer(readOnly=True,
-                            description='The unique id assigned internally by service'),
+        'id': fields.Integer(readOnly=True, description='The unique id assigned internally by service'),
     }
 )
 
@@ -62,8 +61,7 @@ id_shopcart_model = api.inherit(
     'IdShopcartModel',
     shopcart_model,
     {
-        'id': fields.Integer(readOnly=True,
-                            description='The unique id assigned internally by service'),
+        'id': fields.Integer(readOnly=True, description='The unique id assigned internally by service'),
         'products': fields.List(cls_or_instance=product_field, required=False, description='The products it have')
     }
 )
@@ -420,8 +418,7 @@ class ItemsResource(Resource):
                 min_price = args.get('min-price')
                 app.logger.info(f"Have min-price {min_price}")
             products = Products.find_product_with_range(user_id, max_price, min_price).all()
-        except Exception as e:
-            app.logger.info(e)
+        except Exception:
             products = Products.find_product(user_id).all()
 
         # Return the list of products
