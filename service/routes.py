@@ -55,7 +55,7 @@ shopcart_model = api.model('Shopcart', {
 product_args = reqparse.RequestParser()
 product_args.add_argument('max-price', type=str, required=True, help='List products by max-price', location='args')
 product_args.add_argument('min-price', type=str, required=True, help='List products by min-price', location='args')
-
+product_args.add_argument('order-type', type=str, required=True, help='List product by order type', locations='args')
 
 ######################################################################
 # Authorization Decorator
@@ -396,13 +396,18 @@ class ItemsResource(Resource):
 
         try:
             args = request.args
-            if args.get('max-price'):
-                max_price = args.get('max-price')
-                app.logger.info(f"Have max-price {max_price}")
-            if args.get('min-price'):
-                min_price = args.get('min-price')
-                app.logger.info(f"Have min-price {min_price}")
-            products = Products.find_product_with_range(user_id, max_price, min_price).all()
+            if args.get('max-price') or args.get('max-price'):
+                if args.get('max-price'):
+                    max_price = args.get('max-price')
+                    app.logger.info(f"Have max-price {max_price}")
+                if args.get('min-price'):
+                    min_price = args.get('min-price')
+                    app.logger.info(f"Have min-price {min_price}")
+                products = Products.find_product_with_range(user_id, max_price, min_price).all()
+            elif args.get('order-type'):
+                order_type = args.get('order-type')
+                app.logger.info(f"Have order-type {order_type}")
+                products = Products.find_product_with_order(user_id, order_type).all()
         except Exception as e:
             app.logger.info(e)
             products = Products.find_product(user_id).all()
