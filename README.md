@@ -6,7 +6,7 @@
 
 ## The service has been deployed to IBM clod
 
-- The url is http://169.51.205.153/
+- The url is http://169.51.194.219/
 
 - The development version of the app is on port 31001
 
