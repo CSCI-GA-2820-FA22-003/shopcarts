@@ -6,7 +6,7 @@ All of the models are stored in this module
 import logging
 from datetime import date
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_
+from sqlalchemy import and_, desc
 
 
 logger = logging.getLogger("flask.app")
@@ -337,6 +337,22 @@ class Products(db.Model):
         return cls.query.filter(and_(cls.user_id == user_id,
                                 cls.price <= max_price, cls.price >= min_price))
 
+    @classmethod
+    def find_product_with_order(cls, user_id, order_type):
+        """Returns all Products with the given order type
+        Args:
+            order_type (str): the order type you want to query
+        """
+        query_info = f"user id: {user_id}"
+        query_info += f"order type: {order_type}"
+        logger.info("Processing product query for %s ...", query_info)
+        if order_type == "PA":
+            return cls.query.filter(cls.user_id == user_id).order_by(cls.price)
+        elif order_type == "PD":
+            return cls.query.filter(cls.user_id == user_id).order_by(desc(cls.price))
+        else:
+            return cls.query.filter(cls.user_id == user_id)
+            
     @classmethod
     def find_product(cls, user_id):
         """Returns all Products with the given query parameter
