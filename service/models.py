@@ -350,6 +350,10 @@ class Products(db.Model):
             return cls.query.filter(cls.user_id == user_id).order_by(cls.price)
         elif order_type == "PD":
             return cls.query.filter(cls.user_id == user_id).order_by(desc(cls.price))
+        elif order_type == "TA":
+            return cls.query.filter(cls.user_id == user_id).order_by(cls.time)
+        elif order_type == "TD":
+            return cls.query.filter(cls.user_id == user_id).order_by(desc(cls.time))
         else:
             return cls.query.filter(cls.user_id == user_id)
 
