@@ -393,12 +393,12 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(len(Products.all()), 3)
         resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items")
         self.assertEqual(len(resp.get_json()), 3)
-        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items?order-query=PA")
+        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items?order-type=PA")
         data = resp.get_json()
         self.assertEqual(len(data), 3)
         for i in range(len(data) - 1):
             self.assertTrue(data[i]["price"] <= data[i+1]["price"])
-        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items?order-query=PD")
+        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items?order-type=PD")
         data = resp.get_json()
         self.assertEqual(len(data), 3)
         for i in range(len(data) - 1):
