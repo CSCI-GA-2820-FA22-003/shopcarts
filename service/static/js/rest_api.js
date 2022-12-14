@@ -464,7 +464,7 @@ $(function () {
         }else{
             let ajax = $.ajax({
                 type: "GET",
-                url: `${PREFIX}/shopcarts/${user_id}/items?order-query=${order_type}`,
+                url: `${PREFIX}/shopcarts/${user_id}/items?order-type=${order_type}`,
                 // contentType: "application/json",
                 // data: ''
             })
