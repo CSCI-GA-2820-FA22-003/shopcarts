@@ -61,11 +61,11 @@ Shopcarts schema
 **List of REST API endpoints**
 ----
 
-POST   /shopcarts: [Create a shopcart](./docs/Shopcarts/Create.md)\
-GET    /shopcarts: [List all shopcarts](./docs/Shopcarts/read_all.md)\
-GET    /shopcarts/{id}: [Read a shopcart](./docs/Shopcarts/read.md)\
-PUT    /shopcarts/{id}: [Update a shopcart](./docs/Shopcarts/update.md)\
-DELETE /shopcarts/{id}: [Delete a shopcart](./docs/Shopcarts/delete.md)
+POST   /shopcarts: [Create a shopcart](./docs/shopcarts/create.md)\
+GET    /shopcarts: [List all shopcarts](./docs/shopcarts/read_all.md)\
+GET    /shopcarts/{id}: [Read a shopcart](./docs/shopcarts/read.md)\
+PUT    /shopcarts/{id}: [Update a shopcart](./docs/shopcarts/update.md)\
+DELETE /shopcarts/{id}: [Delete a shopcart](./docs/shopcarts/delete.md)
 
 POST   /shopcarts/{id}/items	   <- [Add an item to a shopcart](#create-a-product)\
 GET    /shopcarts/{id}/items	   <- [List all items in a shopcart](#read-all-product)\
