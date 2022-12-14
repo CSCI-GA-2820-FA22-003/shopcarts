@@ -67,8 +67,8 @@ GET    /shopcarts/{id}: [Read a shopcart](./docs/shopcarts/read.md)\
 PUT    /shopcarts/{id}: [Update a shopcart](./docs/shopcarts/update.md)\
 DELETE /shopcarts/{id}: [Delete a shopcart](./docs/shopcarts/delete.md)
 
-POST   /shopcarts/{id}/items	   <- [Add an item to a shopcart](./docs/items/add.md)\
-GET    /shopcarts/{id}/items	   <- [List all items in a shopcart](./docs/items/list.md)\
-GET    /shopcarts/{id}/items/{id}  <- [Read an item from a shopcart](./docs/items/read.md)\
-PUT    /shopcarts/{id}/items/{id}  <- [Update an item in a shopcart](./docs/items/update.md)\
-DELETE /shopcarts/{id}/items/{id}  <- [Delete an item from a shopcart](./docs/items/delete.md)
+POST   /shopcarts/{id}/items: [Add an item to a shopcart](./docs/items/add.md)\
+GET    /shopcarts/{id}/items: [List all items in a shopcart](./docs/items/list.md)\
+GET    /shopcarts/{id}/items/{id}: [Read an item from a shopcart](./docs/items/read.md)\
+PUT    /shopcarts/{id}/items/{id}: [Update an item in a shopcart](./docs/items/update.md)\
+DELETE /shopcarts/{id}/items/{id}: [Delete an item from a shopcart](./docs/items/delete.md)
