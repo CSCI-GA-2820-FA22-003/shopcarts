@@ -277,6 +277,28 @@ class TestProductsModel(unittest.TestCase):
         self.assertEqual(len(found_product2), 1)
         self.assertEqual(len(found_product3), 1)
 
+    def test_query_order_type(self):
+        """It should query product with different order type"""
+        shopcart = ShopcartsFactory()
+        logging.debug(shopcart)
+        shopcart.id = None
+        shopcart.create()
+        product = Products(user_id=shopcart.user_id, product_id="1", name="Pen",
+                           price=4, time=date(2011, 1, 2), quantity=1)
+        product.create()
+        product = Products(user_id=shopcart.user_id, product_id="2", name="Pencil",
+                           price=2, time=date(2011, 1, 2), quantity=1)
+        product.create()
+        product = Products(user_id=shopcart.user_id, product_id="3", name="Melon",
+                           price=6, time=date(2011, 1, 2), quantity=1)
+        product.create()
+        query_product1 = Products.find_product_with_order(shopcart.user_id, "PA").all()
+        query_product2 = Products.find_product_with_order(shopcart.user_id, "PD").all()
+        for i in range(len(query_product1) - 1):
+            self.assertTrue(query_product1[i].price <= query_product1[i+1].price)
+        for i in range(len(query_product2) - 1):
+            self.assertTrue(query_product2[i].price >= query_product2[i+1].price)
+
 
 class TestProductsDeserialize(unittest.TestCase):
     """ Test Cases for Products Model serialize and deserialize function """
