@@ -35,7 +35,6 @@ def index():
 # Define the model so that the docs reflect what can be sent
 
 product_model = api.model('Product', {
-    'id': fields.Integer(required=True, description='The id of the record'),
     'user_id': fields.String(required=True, description='The user_id of the product who buy it'),
     'product_id': fields.String(required=True, description='The id of the product'),
     'quantity': fields.Float(required=True, description='The quantity of products in shopcart'),
@@ -44,18 +43,36 @@ product_model = api.model('Product', {
     'time': fields.Date(required=True, description='The day the record was created')
 })
 
+record_model = api.inherit(
+    'RecordModel',
+    product_model,
+    {
+        'id': fields.Integer(readOnly=True, description='The unique id assigned internally by service'),
+    }
+)
+
 product_field = fields.Raw()
 shopcart_model = api.model('Shopcart', {
-    'id': fields.String(required=True, description='The id of Shopcart'),
+
     'user_id': fields.String(required=True, description='The user who own this shopcart'),
-    'products': fields.List(cls_or_instance=product_field, required=True, description='The products it have')
 })
+
+id_shopcart_model = api.inherit(
+    'IdShopcartModel',
+    shopcart_model,
+    {
+        'id': fields.Integer(readOnly=True, description='The unique id assigned internally by service'),
+        'products': fields.List(cls_or_instance=product_field, required=False, description='The products it have')
+    }
+)
 
 # query string arguments
 product_args = reqparse.RequestParser()
+
 product_args.add_argument('max-price', type=str, required=True, help='List products by max-price', location='args')
 product_args.add_argument('min-price', type=str, required=True, help='List products by min-price', location='args')
 product_args.add_argument('order-type', type=str, required=True, help='List product by order type', location='args')
+
 
 ######################################################################
 # Authorization Decorator
@@ -100,7 +117,7 @@ class ShopcartResource(Resource):
     ######################################################################
     @api.doc('get_shopcart')
     @api.response(404, 'Shopcart not found')
-    @api.marshal_with(shopcart_model)
+    @api.marshal_with(id_shopcart_model)
     def get(self, user_id):
         """Read a shopcart
             Args:
@@ -126,8 +143,8 @@ class ShopcartResource(Resource):
     @api.doc('update_shopcart', security='apikey')
     @api.response(404, 'Shopcart not found')
     @api.response(400, 'The posted Shopcart data was not valid')
-    @api.expect(product_model)
-    @api.marshal_with(product_model)
+    @api.expect(shopcart_model)
+    @api.marshal_with(shopcart_model)
     @token_required
     def put(self, user_id):
         """Update items in shopcart
@@ -202,12 +219,12 @@ class ShopcartCollection(Resource):
     @api.doc('create_shopcart', security='apikey')
     @api.response(400, 'The posted data was not valid')
     @api.expect(shopcart_model)
-    @api.marshal_with(shopcart_model, code=201)
+    @api.marshal_with(id_shopcart_model, code=201)
     @token_required
     def post(self):
         """Creates a new shopcart and stores it in the database
         Args:
-            user_id (str): the user_id of the shopcart to create
+            shopcart_model
         Returns:
             dict: the shopcart and it's value
         """
@@ -238,8 +255,8 @@ class ShopcartCollection(Resource):
     ######################################################################
 
     @api.doc('get_all_shopcartS')
-    # @api.response(404, 'Shopcart not found')
-    @api.marshal_with(shopcart_model)
+    @api.response(404, 'Shopcart not found')
+    @api.marshal_with(id_shopcart_model)
     def get(self):
         """List all shopcarts
         Returns:
@@ -381,7 +398,7 @@ class ItemsResource(Resource):
     @api.doc('get_product')
     # @api.response(404, 'Product not found')
     @api.expect(product_args, validate=True)
-    @api.marshal_with(product_model)
+    @api.marshal_with(record_model)
     def get(self, user_id):
         """Read all products in the shopcart
         Args:
@@ -431,7 +448,7 @@ class ItemsResource(Resource):
     @api.doc('add_product', security='apikey')
     @api.response(400, 'The posted data was not valid')
     @api.expect(product_model)
-    @api.marshal_with(product_model, code=201)
+    @api.marshal_with(record_model, code=201)
     @token_required
     def post(self, user_id):
         """
@@ -444,7 +461,10 @@ class ItemsResource(Resource):
         app.logger.info("Add a product into the shopcart")
         product = Products()
         check_content_type("application/json")
-        product.deserialize(request.get_json())
+        product.deserialize(api.payload)
+        shopcarts = Shopcarts.find_by_user_id(product.user_id).all()
+        if len(shopcarts) == 0:
+            abort(status.HTTP_404_NOT_FOUND, f"Shopcart {product.user_id} does not exist")
         product.create()
         app.logger.info(f"Product {product.product_id} created in shopcart {user_id}")
 
@@ -470,7 +490,7 @@ class EmptyResource(Resource):
     PUT /shopcart/{user_id}/empty - Empty a shopcart with the user id
     """
     ######################################################################
-    # READ A Product
+    # Empty A Shopcart
     ######################################################################
     @api.doc('empty_a_shopcart')
     @api.response(404, 'User_id not found')
@@ -485,7 +505,7 @@ class EmptyResource(Resource):
 
         # Get the current shopcart
         shopcarts = Shopcarts.find_by_user_id(user_id).all()
-        if shopcarts is None:
+        if len(shopcarts) == 0:
             abort(status.HTTP_404_NOT_FOUND, f"Shopcart {user_id} does not exist")
 
         # empty the shopcart
