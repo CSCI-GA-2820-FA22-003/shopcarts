@@ -71,4 +71,4 @@ POST   /shopcarts/{id}/items	   <- [Add an item to a shopcart](./docs/items/add.
 GET    /shopcarts/{id}/items	   <- [List all items in a shopcart](./docs/items/list.md)\
 GET    /shopcarts/{id}/items/{id}  <- [Read an item from a shopcart](./docs/items/read.md)\
 PUT    /shopcarts/{id}/items/{id}  <- [Update an item in a shopcart](./docs/items/update.md)\
-DELETE /shopcarts/{id}/items/{id}  <- [Delete an item from a shopcart](./docs/items/delete.md)\
+DELETE /shopcarts/{id}/items/{id}  <- [Delete an item from a shopcart](./docs/items/delete.md)
