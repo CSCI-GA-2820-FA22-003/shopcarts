@@ -352,7 +352,7 @@ class Products(db.Model):
             return cls.query.filter(cls.user_id == user_id).order_by(desc(cls.price))
         else:
             return cls.query.filter(cls.user_id == user_id)
-            
+
     @classmethod
     def find_product(cls, user_id):
         """Returns all Products with the given query parameter
