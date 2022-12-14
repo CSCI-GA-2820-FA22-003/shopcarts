@@ -377,7 +377,7 @@ class TestYourResourceServer(TestCase):
         shopcart = ShopcartsFactory()
         self.app.post(BASE_URL_API, json=shopcart.serialize(), headers=self.headers)
         product = Products(user_id=shopcart.user_id, product_id="1", name="Pen",
-                           price=4, time=date(2011, 1, 2), quantity=1)
+                           price=4, time=date(2011, 2, 1), quantity=1)
         resp = self.app.post(f"{BASE_URL_API}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 1)
@@ -387,7 +387,7 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 2)
         product = Products(user_id=shopcart.user_id, product_id="3", name="Melon",
-                           price=6, time=date(2011, 1, 2), quantity=1)
+                           price=6, time=date(2011, 3, 5), quantity=1)
         resp = self.app.post(f"{BASE_URL_API}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
         self.assertEqual(len(Products.all()), 3)
@@ -403,6 +403,16 @@ class TestYourResourceServer(TestCase):
         self.assertEqual(len(data), 3)
         for i in range(len(data) - 1):
             self.assertTrue(data[i]["price"] >= data[i+1]["price"])
+        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items?order-type=TA")
+        data = resp.get_json()
+        self.assertEqual(len(data), 3)
+        for i in range(len(data) - 1):
+            self.assertTrue(data[i]["time"] <= data[i+1]["time"])
+        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items?order-type=TD")
+        data = resp.get_json()
+        self.assertEqual(len(data), 3)
+        for i in range(len(data) - 1):
+            self.assertTrue(data[i]["time"] >= data[i+1]["time"])
 
     def test_empty_shopcarts(self):
         """ It should Empty a Shopcart """

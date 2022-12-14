@@ -144,3 +144,25 @@ Scenario: Query products in descending order by price
     Then I should see "water" in the results
     Then I should see "food" in the results
     Then I should see "pen" in the results
+
+Scenario: Query products in ascending order by time
+    When I visit the "home page"
+    And I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I set the "Order Type" to "TA"
+    And I press the "Sort" button
+    Then I should see the message "Success"
+    Then I should see "pen" in the results
+    Then I should see "food" in the results
+    Then I should see "water" in the results
+
+Scenario: Query products in descending order by time
+    When I visit the "home page"
+    And I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I set the "Order Type" to "TD"
+    And I press the "Sort" button
+    Then I should see the message "Success"
+    Then I should see "water" in the results
+    Then I should see "food" in the results
+    Then I should see "pen" in the results
