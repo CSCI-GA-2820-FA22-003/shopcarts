@@ -372,6 +372,38 @@ class TestYourResourceServer(TestCase):
         resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items?max-price=5&min-price=1")
         self.assertEqual(len(resp.get_json()), 2)
 
+    def test_query_order_types(self):
+        """ It should Return Products satisfied the order type """
+        shopcart = ShopcartsFactory()
+        self.app.post(BASE_URL_API, json=shopcart.serialize(), headers=self.headers)
+        product = Products(user_id=shopcart.user_id, product_id="1", name="Pen",
+                           price=4, time=date(2011, 1, 2), quantity=1)
+        resp = self.app.post(f"{BASE_URL_API}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(Products.all()), 1)
+        product = Products(user_id=shopcart.user_id, product_id="2", name="Pencil",
+                           price=2, time=date(2011, 1, 2), quantity=1)
+        resp = self.app.post(f"{BASE_URL_API}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(Products.all()), 2)
+        product = Products(user_id=shopcart.user_id, product_id="3", name="Melon",
+                           price=6, time=date(2011, 1, 2), quantity=1)
+        resp = self.app.post(f"{BASE_URL_API}/{shopcart.user_id}/items", json=product.serialize(), headers=self.headers)
+        self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(Products.all()), 3)
+        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items")
+        self.assertEqual(len(resp.get_json()), 3)
+        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items?order-type=PA")
+        data = resp.get_json()
+        self.assertEqual(len(data), 3)
+        for i in range(len(data) - 1):
+            self.assertTrue(data[i]["price"] <= data[i+1]["price"])
+        resp = self.app.get(f"{BASE_URL_API}/{shopcart.user_id}/items?order-type=PD")
+        data = resp.get_json()
+        self.assertEqual(len(data), 3)
+        for i in range(len(data) - 1):
+            self.assertTrue(data[i]["price"] >= data[i+1]["price"])
+
     def test_empty_shopcarts(self):
         """ It should Empty a Shopcart """
         shopcart = ShopcartsFactory()
