@@ -452,10 +452,11 @@ $(function () {
     // Query products in the given order
     // ****************************************
 
-    $("#order-query-btn").click(function () {
+    $("#sort-btn").click(function () {
 
         let user_id = $("#user_id").val();
         let order_type = $("#order_type").val();
+        
 
         $("#flash_message").empty();
         if(!user_id||!order_type){
