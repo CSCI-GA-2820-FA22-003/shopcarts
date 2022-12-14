@@ -122,3 +122,25 @@ Scenario: Query a product with max and min price
     Then I should not see "pen" in the results
     Then I should see "food" in the results
     Then I should not see "water" in the results
+
+Scenario: Query products in ascending order by price
+    When I visit the "home page"
+    And I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I set the "order_type" to "Price Ascend"
+    And I press the "Sort" button
+    Then I should see the message "Success"
+    Then I should not see "pen" in the first row of the results
+    Then I should see "food" in the second row of the results
+    Then I should not see "water" in the third row of the results
+
+Scenario: Query products in descending order by price
+    When I visit the "home page"
+    And I press the "Clear" button
+    And I set the "User ID" to "1"
+    And I set the "order_type" to "Price Descend"
+    And I press the "Sort" button
+    Then I should see the message "Success"
+    Then I should not see "water" in the first row of the results
+    Then I should see "food" in the second row of the results
+    Then I should not see "pen" in the third row of the results
