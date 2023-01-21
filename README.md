@@ -4,13 +4,7 @@
 [![BDD Tests](https://github.com/CSCI-GA-2820-FA22-003/shopcarts/actions/workflows/bdd.yml/badge.svg)](https://github.com/CSCI-GA-2820-FA22-003/shopcarts/actions/workflows/bdd.yml)
 [![codecov](https://codecov.io/gh/CSCI-GA-2820-FA22-003/shopcarts/branch/main/graph/badge.svg?token=7E17S7VS4E)](https://codecov.io/gh/CSCI-GA-2820-FA22-003/shopcarts)
 
-## The service has been deployed to IBM clod
-
-- The url is http://169.51.194.219/
-
-- The development version of the app is on port 31001
-
-- The production version of the app is on port 31002
+## The service has been deployed to IBM clod (the IBM cloud has been expired). Please fork the code and try it locally.
 
 ## Important: Before you submit a pull request. Make sure
 
